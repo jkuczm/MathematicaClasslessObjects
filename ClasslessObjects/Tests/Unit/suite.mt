@@ -1,0 +1,12 @@
+TestSuite[{
+	"ObjectQ.mt",
+	"Super.mt",
+	"getInheritanceChain.mt",
+	"Object.mt",
+	"WithOrdinaryObjectSet.mt",
+	"SetSuper.mt",
+	"setMember.mt",
+	"bindMember.mt",
+	"unsetMember.mt",
+	"DeclareObject.mt"
+}]

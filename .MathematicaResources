@@ -1,0 +1,8 @@
+Resources[
+    Version[1],
+    ExecutionBuildCommand["\"No build command\""],
+    Paclet[
+        PacletFolder["ClasslessObjects"],
+        FunctionPaclet[False]
+    ]
+]
