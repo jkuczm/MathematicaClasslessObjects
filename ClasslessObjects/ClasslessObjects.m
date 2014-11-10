@@ -228,9 +228,11 @@ WithOrdinaryObjectSet[obj_?ObjectQ, body_] :=
 	Module[
 		{
 			upValues = UpValues[obj],
+			protected,
 			result
 		}
 		,
+		protected = Unprotect[obj];
 		(*
 			All "set altering" definitions are attached to objects via
 			UpValues, remove them temporarily.
@@ -240,10 +242,13 @@ WithOrdinaryObjectSet[obj_?ObjectQ, body_] :=
 				UpValues[obj],
 				Except[HoldPattern[HoldPattern][_Set | _SetDelayed | _Unset]]
 			];
+		Protect @@ protected;
 		
 		result = body;
 		
+		Unprotect @@ protected;
 		UpValues[obj] = upValues;
+		Protect @@ protected;
 		
 		result
 	]
