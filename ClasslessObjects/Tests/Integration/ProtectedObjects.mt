@@ -4,7 +4,10 @@
 (*SetUp*)
 
 
-BeginPackage["ClasslessObjects`Tests`Acceptance`ProtectedObjects`", {"MUnit`"}]
+BeginPackage[
+	"ClasslessObjects`Tests`Integration`ProtectedObjects`",
+	{"MUnit`"}
+]
 
 
 Get["ClasslessObjects`"]

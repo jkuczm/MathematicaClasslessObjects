@@ -5,7 +5,7 @@
 
 
 BeginPackage[
-	"ClasslessObjects`Tests`Acceptance`MembersTwoLevelInheritance`",
+	"ClasslessObjects`Tests`Integration`MembersTwoLevelInheritance`",
 	{"MUnit`"}
 ]
 

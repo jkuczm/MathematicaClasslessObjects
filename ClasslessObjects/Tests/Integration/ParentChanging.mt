@@ -4,7 +4,7 @@
 (*SetUp*)
 
 
-BeginPackage["ClasslessObjects`Tests`Acceptance`ParentChanging`", {"MUnit`"}]
+BeginPackage["ClasslessObjects`Tests`Integration`ParentChanging`", {"MUnit`"}]
 
 
 Get["ClasslessObjects`"]
