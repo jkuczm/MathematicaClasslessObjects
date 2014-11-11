@@ -311,8 +311,13 @@ SetAttributes[setMember, HoldRest]
 
 setMember[obj_?ObjectQ, lhs_, rhs_] :=
 	WithOrdinaryObjectSet[obj,
-		(* Definition that makes member inheritable. *)
-		obj[lhs, _] = rhs;
+		(* Don't duplicate Set::write warning if object is protected. *)
+		Quiet[
+			(* Definition that makes member inheritable. *)
+			obj[lhs, _] = rhs
+			,
+			Set::write
+		];
 		
 		(* Ordinary definition. *)
 		obj[lhs] = rhs
@@ -328,8 +333,13 @@ SetAttributes[bindMember, HoldRest]
 
 bindMember[obj_?ObjectQ, lhs_, rhs_] :=
 	WithOrdinaryObjectSet[obj,
-		(* Inheritable definition providing $self variable. *)
-		obj[lhs, self_] := Block[{$self = self}, rhs];
+		(* Don't duplicate SetDelayed::write warning if object is protected. *)
+		Quiet[
+			(* Inheritable definition providing $self variable. *)
+			obj[lhs, self_] := Block[{$self = self}, rhs]
+			,
+			SetDelayed::write
+		];
 		
 		(* Ordinary definition providing $self variable. *)
 		obj[lhs] := Block[{$self = obj}, rhs]
