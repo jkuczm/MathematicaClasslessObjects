@@ -18,6 +18,10 @@ AppendTo[$ContextPath, "ClasslessObjects`Private`"]
 
 
 (* ::Subsection:: *)
+(*Non-protected object*)
+
+
+(* ::Subsubsection:: *)
 (*Set member*)
 
 
@@ -47,7 +51,7 @@ Module[
 ]
 
 
-(* ::Subsection:: *)
+(* ::Subsubsection:: *)
 (*Reset member*)
 
 
@@ -71,6 +75,74 @@ Module[
 		{
 			HoldPattern[obj[member]] :>  Block[{$self = obj}, newValue],
 			HoldPattern[obj[member, self_]] :> Block[{$self = self}, newValue]
+		}
+		,
+		TestID -> "Reset member: object down values"
+	];
+]
+
+
+(* ::Subsection:: *)
+(*Protected object*)
+
+
+(* ::Subsubsection:: *)
+(*Set member*)
+
+
+Module[
+	{obj, member, value}
+	,
+	ObjectQ[obj] ^= True;
+	Protect[obj];
+	
+	Test[
+		bindMember[obj, member, value]
+		,
+		$Failed
+		,
+		Message[SetDelayed::write, obj, obj@member]
+		,
+		TestID -> "Set member: bindMember evaluation"
+	];
+	
+	Test[
+		DownValues[obj]
+		,
+		{}
+		,
+		TestID -> "Set member: object down values"
+	];
+]
+
+
+(* ::Subsubsection:: *)
+(*Reset member*)
+
+
+Module[
+	{obj, member, oldValue, newValue}
+	,
+	ObjectQ[obj] ^= True;
+	bindMember[obj, member, oldValue];
+	Protect[obj];
+	
+	Test[
+		bindMember[obj, member, newValue]
+		,
+		$Failed
+		,
+		Message[SetDelayed::write, obj, obj@member]
+		,
+		TestID -> "Reset member: bindMember evaluation"
+	];
+	
+	Test[
+		DownValues[obj]
+		,
+		{
+			HoldPattern[obj[member]] :>  Block[{$self = obj}, oldValue],
+			HoldPattern[obj[member, self_]] :> Block[{$self = self}, oldValue]
 		}
 		,
 		TestID -> "Reset member: object down values"
