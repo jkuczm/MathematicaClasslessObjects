@@ -228,9 +228,11 @@ WithOrdinaryObjectSet[obj_?ObjectQ, body_] :=
 	Module[
 		{
 			upValues = UpValues[obj],
+			protected,
 			result
 		}
 		,
+		protected = Unprotect[obj];
 		(*
 			All "set altering" definitions are attached to objects via
 			UpValues, remove them temporarily.
@@ -240,10 +242,13 @@ WithOrdinaryObjectSet[obj_?ObjectQ, body_] :=
 				UpValues[obj],
 				Except[HoldPattern[HoldPattern][_Set | _SetDelayed | _Unset]]
 			];
+		Protect @@ protected;
 		
 		result = body;
 		
+		Unprotect @@ protected;
 		UpValues[obj] = upValues;
+		Protect @@ protected;
 		
 		result
 	]
@@ -306,8 +311,13 @@ SetAttributes[setMember, HoldRest]
 
 setMember[obj_?ObjectQ, lhs_, rhs_] :=
 	WithOrdinaryObjectSet[obj,
-		(* Definition that makes member inheritable. *)
-		obj[lhs, _] = rhs;
+		(* Don't duplicate Set::write warning if object is protected. *)
+		Quiet[
+			(* Definition that makes member inheritable. *)
+			obj[lhs, _] = rhs
+			,
+			Set::write
+		];
 		
 		(* Ordinary definition. *)
 		obj[lhs] = rhs
@@ -323,8 +333,13 @@ SetAttributes[bindMember, HoldRest]
 
 bindMember[obj_?ObjectQ, lhs_, rhs_] :=
 	WithOrdinaryObjectSet[obj,
-		(* Inheritable definition providing $self variable. *)
-		obj[lhs, self_] := Block[{$self = self}, rhs];
+		(* Don't duplicate SetDelayed::write warning if object is protected. *)
+		Quiet[
+			(* Inheritable definition providing $self variable. *)
+			obj[lhs, self_] := Block[{$self = self}, rhs]
+			,
+			SetDelayed::write
+		];
 		
 		(* Ordinary definition providing $self variable. *)
 		obj[lhs] := Block[{$self = obj}, rhs]
@@ -341,35 +356,47 @@ SetAttributes[unsetMember, HoldRest]
 unsetMember[obj_?ObjectQ, lhs_] :=
 	WithOrdinaryObjectSet[obj,
 		Module[
-			{results}
+			{
+				inherUnbound, inherBound, nonInher,
+				norepCount = 0
+			}
 			,
-			results = Quiet[
-				{
-					(*
-						Remove definition with unnamed second pattern.
-						It exists for inheritable unbound members.
-					*)
-					obj[lhs, _] =.
-					,
-					(*
-						Remove definitions with named second pattern.
-						It exist for inheritable bound members.
-					*)
-					obj[lhs, self_] =.
-					,
-					(* Remove non-inheritable definition. *)
-					obj[lhs] =.
-				}
+			Quiet[
+				(*
+					Unset definition with unnamed second pattern.
+					It exists for inheritable unbound members.
+				*)
+				Check[
+					inherUnbound = (obj[lhs, _] =.),
+					norepCount++,
+					Unset::norep
+				];
+				(*
+					Unset definitions with named second pattern.
+					It exists for inheritable bound members.
+				*)
+				Check[
+					inherBound = (obj[lhs, self_] =.),
+					norepCount++,
+					Unset::norep
+				];
 				,
-				Unset::norep
+				{Unset::norep, Unset::write}
 			];
 			
-			If[!MemberQ[results, Null],
-				(*
-					All Upsets evaluation failed so there was no member lhs
-					in given object.
-				*)
-				Message[Unset::norep, HoldForm[obj@lhs], HoldForm[obj]];
+			(*
+				Unset non-inheritable definition. If at leas one of prevoiusly
+				unset definitions existed quiet Unset::norep message.
+			*)
+			nonInher =
+				If[norepCount == 2,
+					obj[lhs] =.
+				(* else *),
+					Quiet[obj[lhs] =., Unset::norep]
+				];
+			
+			If[!MatchQ[Null, inherUnbound | inherBound | nonInher],
+				(* All Upset evaluations failed so return $Failed. *)
 				$Failed
 			]
 		]

@@ -15,5 +15,6 @@ TestSuite[{
 	"Integration/MembersNoInheritance.mt",
 	"Integration/MembersOneLevelInheritance.mt",
 	"Integration/MembersTwoLevelInheritance.mt",
-	"Integration/MembersExplicitSelf.mt"
+	"Integration/MembersExplicitSelf.mt",
+	"Integration/ProtectedObjects.mt"
 }]

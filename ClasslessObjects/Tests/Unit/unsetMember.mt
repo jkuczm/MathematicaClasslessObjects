@@ -18,6 +18,10 @@ AppendTo[$ContextPath, "ClasslessObjects`Private`"]
 
 
 (* ::Subsection:: *)
+(*Non-protected object*)
+
+
+(* ::Subsubsection:: *)
 (*Unset non-existing member*)
 
 
@@ -46,7 +50,7 @@ Module[
 ]
 
 
-(* ::Subsection:: *)
+(* ::Subsubsection:: *)
 (*Unset non-inheritable member*)
 
 
@@ -74,7 +78,7 @@ Module[
 ]
 
 
-(* ::Subsection:: *)
+(* ::Subsubsection:: *)
 (*Unset non-inheritable delayed member*)
 
 
@@ -102,7 +106,7 @@ Module[
 ]
 
 
-(* ::Subsection:: *)
+(* ::Subsubsection:: *)
 (*Unset inheritable-only member*)
 
 
@@ -130,7 +134,7 @@ Module[
 ]
 
 
-(* ::Subsection:: *)
+(* ::Subsubsection:: *)
 (*Unset inheritable-only delayed member*)
 
 
@@ -158,7 +162,7 @@ Module[
 ]
 
 
-(* ::Subsection:: *)
+(* ::Subsubsection:: *)
 (*Unset inheritable member*)
 
 
@@ -187,7 +191,7 @@ Module[
 ]
 
 
-(* ::Subsection:: *)
+(* ::Subsubsection:: *)
 (*Unset inheritable delayed member*)
 
 
@@ -212,6 +216,239 @@ Module[
 		{}
 		,
 		TestID -> "inheritable-only member: object down values"
+	];
+]
+
+
+(* ::Subsection:: *)
+(*Protected object*)
+
+
+(* ::Subsubsection:: *)
+(*Unset non-existing member*)
+
+
+Module[
+	{obj, member, downValues}
+	,
+	ObjectQ[obj] ^= True;
+	Protect[obj];
+	downValues = DownValues[obj];
+	
+	Test[
+		unsetMember[obj, member]
+		,
+		$Failed
+		,
+		Message[Unset::write, obj, obj@member]
+		,
+		TestID -> "protected: non-existing member: unsetMember evaluation"
+	];
+	
+	Test[
+		DownValues[obj]
+		,
+		downValues
+		,
+		TestID -> "protected: non-existing member: object down values"
+	];
+]
+
+
+(* ::Subsubsection:: *)
+(*Unset non-inheritable member*)
+
+
+Module[
+	{obj, member, value, downValues}
+	,
+	ObjectQ[obj] ^= True;
+	obj@member = value;
+	Protect[obj];
+	downValues = DownValues[obj];
+	
+	Test[
+		unsetMember[obj, member]
+		,
+		$Failed
+		,
+		Message[Unset::write, obj, obj@member]
+		,
+		TestID -> "protected: non-inheritable member: unsetMember evaluation"
+	];
+	
+	Test[
+		DownValues[obj]
+		,
+		downValues
+		,
+		TestID -> "protected: non-inheritable member: object down values"
+	];
+]
+
+
+(* ::Subsubsection:: *)
+(*Unset non-inheritable delayed member*)
+
+
+Module[
+	{obj, member, value, downValues}
+	,
+	ObjectQ[obj] ^= True;
+	obj@member := value;
+	Protect[obj];
+	downValues = DownValues[obj];
+	
+	Test[
+		unsetMember[obj, member]
+		,
+		$Failed
+		,
+		Message[Unset::write, obj, obj@member]
+		,
+		TestID ->
+			"protected: non-inheritable delayed member: unsetMember evaluation"
+	];
+	
+	Test[
+		DownValues[obj]
+		,
+		downValues
+		,
+		TestID ->
+			"protected: non-inheritable delayed member: object down values"
+	];
+]
+
+
+(* ::Subsubsection:: *)
+(*Unset inheritable-only member*)
+
+
+Module[
+	{obj, member, value, downValues}
+	,
+	ObjectQ[obj] ^= True;
+	obj[member, _] = value;
+	Protect[obj];
+	downValues = DownValues[obj];
+	
+	Test[
+		unsetMember[obj, member]
+		,
+		$Failed
+		,
+		Message[Unset::write, obj, obj@member]
+		,
+		TestID -> "protected: inheritable-only member: unsetMember evaluation"
+	];
+	
+	Test[
+		DownValues[obj]
+		,
+		downValues
+		,
+		TestID -> "protected: inheritable-only member: object down values"
+	];
+]
+
+
+(* ::Subsubsection:: *)
+(*Unset inheritable-only delayed member*)
+
+
+Module[
+	{obj, member, value, downValues}
+	,
+	ObjectQ[obj] ^= True;
+	obj[member, self_] := self + value;
+	Protect[obj];
+	downValues = DownValues[obj];
+	
+	Test[
+		unsetMember[obj, member]
+		,
+		$Failed
+		,
+		Message[Unset::write, obj, obj@member]
+		,
+		TestID -> "protected: inheritable-only delayed member: \
+unsetMember evaluation"
+	];
+	
+	Test[
+		DownValues[obj]
+		,
+		downValues
+		,
+		TestID ->
+			"protected: inheritable-only delayed member: object down values"
+	];
+]
+
+
+(* ::Subsubsection:: *)
+(*Unset inheritable member*)
+
+
+Module[
+	{obj, member, value, downValues}
+	,
+	ObjectQ[obj] ^= True;
+	obj[member] = value;
+	obj[member, _] = value;
+	Protect[obj];
+	downValues = DownValues[obj];
+	
+	Test[
+		unsetMember[obj, member]
+		,
+		$Failed
+		,
+		Message[Unset::write, obj, obj@member]
+		,
+		TestID -> "protected: inheritable-only member: unsetMember evaluation"
+	];
+	
+	Test[
+		DownValues[obj]
+		,
+		downValues
+		,
+		TestID -> "protected: inheritable-only member: object down values"
+	];
+]
+
+
+(* ::Subsubsection:: *)
+(*Unset inheritable delayed member*)
+
+
+Module[
+	{obj, member, value, downValues}
+	,
+	ObjectQ[obj] ^= True;
+	obj[member] := value;
+	obj[member, _] := value;
+	Protect[obj];
+	downValues = DownValues[obj];
+	
+	Test[
+		unsetMember[obj, member]
+		,
+		$Failed
+		,
+		Message[Unset::write, obj, obj@member]
+		,
+		TestID -> "protected: inheritable-only member: unsetMember evaluation"
+	];
+	
+	Test[
+		DownValues[obj]
+		,
+		downValues
+		,
+		TestID -> "protected: inheritable-only member: object down values"
 	];
 ]
 

@@ -37,15 +37,17 @@ TestMatch[
 	,
 	Message[WithOrdinaryObjectSet::argrx, WithOrdinaryObjectSet, 0, 2]
 	,
-	TestID -> "no args: WithOrdinaryObjectSet evaluation"
+	TestID -> "no args: evaluation"
 ]
 
 
 Module[
-	{obj, oldUpValues}
+	{obj, oldUpValues, oldAttributes}
 	,
 	declareMockObjectWithAlteredSetUpValues[obj];
+	
 	oldUpValues = UpValues[obj];
+	oldAttributes = Attributes[obj];
 	
 	TestMatch[
 		WithOrdinaryObjectSet[obj]
@@ -54,7 +56,7 @@ Module[
 		,
 		Message[WithOrdinaryObjectSet::argrx, WithOrdinaryObjectSet, 1, 2]
 		,
-		TestID -> "1 arg: WithOrdinaryObjectSet evaluation"
+		TestID -> "1 arg: evaluation"
 	];
 	
 	Test[
@@ -62,7 +64,14 @@ Module[
 		,
 		oldUpValues
 		,
-		TestID -> "1 arg: object UpValues"
+		TestID -> "1 arg: after: UpValues"
+	];
+	Test[
+		Attributes[obj]
+		,
+		oldAttributes
+		,
+		TestID -> "1 arg: after: Attributes"
 	];
 ]
 
@@ -74,24 +83,26 @@ TestMatch[
 	,
 	Message[Object::object, 1, WithOrdinaryObjectSet[arg1, arg2]]
 	,
-	TestID -> "2 args: first non-object: WithOrdinaryObjectSet evaluation"
+	TestID -> "2 args: first non-object: evaluation"
 ];
 
 
 Module[
-	{obj, oldUpValues}
+	{obj, oldUpValues, oldAttributes}
 	,
 	declareMockObjectWithAlteredSetUpValues[obj];
+	
 	oldUpValues = UpValues[obj];
+	oldAttributes = Attributes[obj];
 	
 	TestMatch[
-		WithOrdinaryObjectSet[obj1, arg2, arg3]
+		WithOrdinaryObjectSet[obj, arg2, arg3]
 		,
-		HoldPattern @ WithOrdinaryObjectSet[obj1, arg2, arg3]
+		HoldPattern @ WithOrdinaryObjectSet[obj, arg2, arg3]
 		,
 		Message[WithOrdinaryObjectSet::argrx, WithOrdinaryObjectSet, 3, 2]
 		,
-		TestID -> "3 args: WithOrdinaryObjectSet evaluation"
+		TestID -> "3 args: evaluation"
 	];
 	
 	Test[
@@ -99,7 +110,14 @@ Module[
 		,
 		oldUpValues
 		,
-		TestID -> "3 args: object UpValues"
+		TestID -> "3 args: after: UpValues"
+	];
+	Test[
+		Attributes[obj]
+		,
+		oldAttributes
+		,
+		TestID -> "3 args: after: Attributes"
 	];
 ]
 
@@ -108,48 +126,50 @@ Module[
 (*Correct arguments*)
 
 
-Module[
-	{obj}
-	,
-	declareMockObjectWithAlteredSetUpValues[obj];
-	
-	Test[
-		WithOrdinaryObjectSet[obj,
-			"evaluation result"
-		]
-		,
-		"evaluation result"
-		,
-		TestID -> "result of body evaluation is returned"
-	]
-]
+(* ::Subsubsection:: *)
+(*Non-protected object*)
 
 
 Module[
-	{obj}
+	{
+		obj, evaluationResult,
+		oldUpValues, oldAttributes,
+		upValuesInside, attributesInside
+	}
 	,
 	declareMockObjectWithAlteredSetUpValues[obj];
 	
+	oldUpValues = UpValues[obj];
+	oldAttributes = Attributes[obj];
+	
 	Test[
 		WithOrdinaryObjectSet[obj,
-			UpValues[obj]
+			upValuesInside = UpValues[obj];
+			attributesInside = Attributes[obj];
+			
+			UpValues[obj] = {HoldPattern[something[obj]] :> "some value"};
+			
+			evaluationResult
 		]
+		,
+		evaluationResult
+		,
+		TestID -> "non-protected: evaluation"
+	];
+	
+	Test[
+		upValuesInside
 		,
 		{HoldPattern[ObjectQ[obj]] :> True}
 		,
-		TestID -> "UpValues inside have no altered set functions"
-	]
-]
-
-
-Module[
-	{obj, oldUpValues}
-	,
-	declareMockObjectWithAlteredSetUpValues[obj];
-	oldUpValues = UpValues[obj];
-	
-	WithOrdinaryObjectSet[obj,
-		UpValues[obj] = {HoldPattern[something[obj]] :> "some value"}
+		TestID -> "non-protected: inside: UpValues"
+	];
+	Test[
+		attributesInside
+		,
+		oldAttributes
+		,
+		TestID -> "non-protected: inside: Attributes"
 	];
 	
 	Test[
@@ -157,7 +177,76 @@ Module[
 		,
 		oldUpValues
 		,
-		TestID -> "object UpValues are restored"
+		TestID -> "non-protected: after: UpValues"
+	];
+	Test[
+		Attributes[obj]
+		,
+		oldAttributes
+		,
+		TestID -> "non-protected: after: Attributes"
+	];
+]
+
+
+(* ::Subsubsection:: *)
+(*Protected object*)
+
+
+Module[
+	{
+		obj, evaluationResult,
+		oldUpValues, oldAttributes,
+		upValuesInside, attributesInside
+	}
+	,
+	declareMockObjectWithAlteredSetUpValues[obj];
+	Protect[obj];
+	
+	oldUpValues = UpValues[obj];
+	oldAttributes = Attributes[obj];
+	
+	Test[
+		WithOrdinaryObjectSet[obj,
+			upValuesInside = UpValues[obj];
+			attributesInside = Attributes[obj];
+			
+			evaluationResult
+		]
+		,
+		evaluationResult
+		,
+		TestID -> "protected: evaluation"
+	];
+	
+	Test[
+		upValuesInside
+		,
+		{HoldPattern[ObjectQ[obj]] :> True}
+		,
+		TestID -> "protected: inside: UpValues"
+	];
+	Test[
+		attributesInside
+		,
+		oldAttributes
+		,
+		TestID -> "protected: inside: Attributes"
+	];
+	
+	Test[
+		UpValues[obj]
+		,
+		oldUpValues
+		,
+		TestID -> "protected: after: UpValues"
+	];
+	Test[
+		Attributes[obj]
+		,
+		oldAttributes
+		,
+		TestID -> "protected: after: Attributes"
 	];
 ]
 

@@ -4,5 +4,6 @@ TestSuite[{
 	"MembersNoInheritance.mt",
 	"MembersOneLevelInheritance.mt",
 	"MembersTwoLevelInheritance.mt",
-	"MembersExplicitSelf.mt"
+	"MembersExplicitSelf.mt",
+	"ProtectedObjects.mt"
 }]
