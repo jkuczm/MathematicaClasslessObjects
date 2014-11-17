@@ -325,8 +325,6 @@ Module[
 		{
 			HoldPattern[HoldPattern][HoldPattern[ObjectQ][obj]] :> True
 			,
-			HoldPattern[HoldPattern][HoldPattern[Super][obj]] :> Object
-			,
 			Sequence @@ setAlteringUpValues[obj]
 		}
 		,
