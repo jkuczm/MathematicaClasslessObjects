@@ -13,9 +13,6 @@ BeginPackage[
 Get["ClasslessObjects`"]
 
 
-DeclareObject[obj]
-
-
 (* ::Section:: *)
 (*Tests*)
 
@@ -24,47 +21,110 @@ DeclareObject[obj]
 (*Non-existing member*)
 
 
-Test[
-	obj@field
+Module[
+	{obj, member}
 	,
-	$Failed
+	DeclareObject[obj];
+	
+	
+	Test[
+		obj@member
+		,
+		$Failed
+		,
+		Message[Object::objectMember, obj, member, {Object}]
+		,
+		TestID -> "Non-existing member: call symbol"
+	]
+]
+Module[
+	{obj, otherObj, member}
 	,
-	Message[Object::objectMember, obj, field, {Object}]
-	,
-	TestID -> "Non-existing member: call symbol"
+	DeclareObject[obj];
+	DeclareObject[otherObj];
+	
+	
+	Test[
+		obj[member, otherObj]
+		,
+		$Failed
+		,
+		Message[Object::objectMember, otherObj, member, {Object}]
+		,
+		TestID -> "Non-existing member: call symbol: explicit self"
+	]
 ]
 
 
-Test[
-	obj@addSome[5]
+Module[
+	{obj, member, arg}
 	,
-	$Failed
+	DeclareObject[obj];
+	
+	
+	Test[
+		obj@member[arg]
+		,
+		$Failed
+		,
+		Message[Object::objectMember, obj, member[arg], {Object}]
+		,
+		TestID -> "Non-existing member: call non-atomic expression"
+	]
+]
+Module[
+	{obj, otherObj, member, arg}
 	,
-	Message[Object::objectMember, obj, addSome[5], {Object}]
-	,
-	TestID -> "Non-existing member: call non-atomic expression"
+	DeclareObject[obj];
+	DeclareObject[otherObj];
+	
+	
+	Test[
+		obj[member[arg], otherObj]
+		,
+		$Failed
+		,
+		Message[Object::objectMember, otherObj, member[arg], {Object}]
+		,
+		TestID ->
+			"Non-existing member: call non-atomic expression: explicit self"
+	]
 ]
 
 
-Test[
-	obj@field =.
+Module[
+	{obj, member}
 	,
-	$Failed
-	,
-	Message[Unset::norep, obj[field], obj]
-	,
-	TestID -> "Non-existing member: unset symbol"
+	DeclareObject[obj];
+	
+	
+	Test[
+		obj@member =.
+		,
+		$Failed
+		,
+		Message[Unset::norep, obj@member, obj]
+		,
+		TestID -> "Non-existing member: unset symbol"
+	]
 ]
 
 
-Test[
-	obj@addSome[5] =.
+Module[
+	{obj, member, arg}
 	,
-	$Failed
-	,
-	Message[Unset::norep, obj[addSome[5]], obj]
-	,
-	TestID -> "Non-existing member: unset non-atomic expression"
+	DeclareObject[obj];
+	
+	
+	Test[
+		obj@member[arg] =.
+		,
+		$Failed
+		,
+		Message[Unset::norep, obj@member[arg], obj]
+		,
+		TestID -> "Non-existing member: unset non-atomic expression"
+	]
 ]
 
 
@@ -72,41 +132,62 @@ Test[
 (*Unbound member*)
 
 
-Test[
-	obj@field = 5
+Module[
+	{obj, otherObj, member, value}
 	,
-	5
-	,
-	TestID -> "Unbound member: set"
-]
-
-
-Test[
-	obj@field
-	,
-	5
-	,
-	TestID -> "Unbound member: call existing"
-]
-
-
-Test[
-	obj@field =.
-	,
-	Null
-	,
-	TestID -> "Unbound member: unset"
-]
-
-
-Test[
-	obj@field
-	,
-	$Failed
-	,
-	Message[Object::objectMember, obj, field, {Object}]
-	,
-	TestID -> "Unbound member: call unset"
+	DeclareObject[obj];
+	DeclareObject[otherObj];
+	
+	
+	Test[
+		obj@member = value
+		,
+		value
+		,
+		TestID -> "Unbound member: set"
+	];
+	
+	Test[
+		obj@member
+		,
+		value
+		,
+		TestID -> "Unbound member: call existing"
+	];
+	Test[
+		obj[member, otherObj]
+		,
+		value
+		,
+		TestID -> "Unbound member: call existing: explicit self"
+	];
+	
+	Test[
+		obj@member =.
+		,
+		Null
+		,
+		TestID -> "Unbound member: unset"
+	];
+	
+	Test[
+		obj@member
+		,
+		$Failed
+		,
+		Message[Object::objectMember, obj, member, {Object}]
+		,
+		TestID -> "Unbound member: call unset"
+	];
+	Test[
+		obj[member, otherObj]
+		,
+		$Failed
+		,
+		Message[Object::objectMember, otherObj, member, {Object}]
+		,
+		TestID -> "Unbound member: call unset: explicit self"
+	];
 ]
 
 
@@ -114,41 +195,62 @@ Test[
 (*Unbound member with $self*)
 
 
-Test[
-	obj@self = $self
+Module[
+	{obj, otherObj, member, value}
 	,
-	$self
-	,
-	TestID -> "Unbound member with $self: set"
-]
-
-
-TestMatch[
-	obj@self
-	,
-	HoldPattern[$self]
-	,
-	TestID -> "Unbound member with $self: call existing"
-]
-
-
-Test[
-	obj@self =.
-	,
-	Null
-	,
-	TestID -> "Unbound member with $self: unset"
-]
-
-
-Test[
-	obj@self
-	,
-	$Failed
-	,
-	Message[Object::objectMember, obj, self, {Object}]
-	,
-	TestID -> "Unbound member with $self: call unset"
+	DeclareObject[obj];
+	DeclareObject[otherObj];
+	
+	
+	Test[
+		obj@member = {value, $self}
+		,
+		{value, $self}
+		,
+		TestID -> "Unbound member with $self: set"
+	];
+	
+	TestMatch[
+		obj@member
+		,
+		HoldPattern[{value, $self}]
+		,
+		TestID -> "Unbound member with $self: call existing"
+	];
+	TestMatch[
+		obj[member, otherObj]
+		,
+		HoldPattern[{value, $self}]
+		,
+		TestID -> "Unbound member with $self: call existing: explicit self"
+	];
+	
+	Test[
+		obj@member =.
+		,
+		Null
+		,
+		TestID -> "Unbound member with $self: unset"
+	];
+	
+	Test[
+		obj@member
+		,
+		$Failed
+		,
+		Message[Object::objectMember, obj, member, {Object}]
+		,
+		TestID -> "Unbound member with $self: call unset"
+	];
+	Test[
+		obj[member, otherObj]
+		,
+		$Failed
+		,
+		Message[Object::objectMember, otherObj, member, {Object}]
+		,
+		TestID -> "Unbound member with $self: call unset: explicit self"
+	];
 ]
 
 
@@ -156,52 +258,84 @@ Test[
 (*Bound member*)
 
 
-Test[
-	obj@addSome[i_Integer] := i + 2
+Module[
+	{obj, otherObj, member, value, arg}
 	,
-	Null
-	,
-	TestID -> "Bound member: set"
-]
-
-
-Test[
-	obj@addSome[5]
-	,
-	7
-	,
-	TestID -> "Bound member: call existing"
-]
-
-
-Test[
-	obj@addSome["test string"]
-	,
-	$Failed
-	,
-	Message[Object::objectMember, obj, addSome["test string"], {Object}]
-	,
-	TestID -> "Bound member: call non-existing with head same as existing"
-]
-
-
-Test[
-	obj@addSome[i_Integer] =.
-	,
-	Null
-	,
-	TestID -> "Bound member: unset"
-]
-
-
-Test[
-	obj@addSome[5]
-	,
-	$Failed
-	,
-	Message[Object::objectMember, obj, addSome[5], {Object}]
-	,
-	TestID -> "Bound member: call unset"
+	DeclareObject[obj];
+	DeclareObject[otherObj];
+	
+	
+	Test[
+		obj@member[i_Symbol] := {value, i}
+		,
+		Null
+		,
+		TestID -> "Bound member: set"
+	];
+	
+	Test[
+		obj@member[arg]
+		,
+		{value, arg}
+		,
+		TestID -> "Bound member: call existing"
+	];
+	Test[
+		obj[member[arg], otherObj]
+		,
+		{value, arg}
+		,
+		TestID -> "Bound member: call existing: explicit self"
+	];
+	
+	Test[
+		obj@member["test string"]
+		,
+		$Failed
+		,
+		Message[Object::objectMember, obj, member["test string"], {Object}]
+		,
+		TestID -> "Bound member: call non-existing with head same as existing"
+	];
+	Test[
+		obj[member["test string"], otherObj]
+		,
+		$Failed
+		,
+		Message[Object::objectMember,
+			otherObj, member["test string"], {Object}
+		]
+		,
+		TestID -> "Bound member: \
+call non-existing with head same as existing: explicit self"
+	];
+	
+	Test[
+		obj@member[i_Symbol] =.
+		,
+		Null
+		,
+		TestID -> "Bound member: unset"
+	];
+	
+	Test[
+		obj@member[arg]
+		,
+		$Failed
+		,
+		Message[Object::objectMember, obj, member[arg], {Object}]
+		,
+		TestID -> "Bound member: call unset"
+	];
+	Test[
+		obj[member[arg], otherObj]
+		,
+		$Failed
+		,
+		Message[Object::objectMember, otherObj, member[arg], {Object}]
+		,
+		TestID -> "Bound member: call unset: explicit self"
+	];
 ]
 
 
@@ -209,53 +343,214 @@ Test[
 (*Bound member with $self*)
 
 
-Test[
-	obj@getSelf[] := $self
+Module[
+	{obj, otherObj, member, value, arg}
 	,
-	Null
-	,
-	TestID -> "Bound member with $self: set"
+	DeclareObject[obj];
+	DeclareObject[otherObj];
+	
+	Test[
+		obj@member[] := {value, $self}
+		,
+		Null
+		,
+		TestID -> "Bound member with $self: set"
+	];
+	
+	Test[
+		obj@member[]
+		,
+		{value, obj}
+		,
+		TestID -> "Bound member with $self: call existing"
+	];
+	Test[
+		obj[member[], otherObj]
+		,
+		{value, otherObj}
+		,
+		TestID -> "Bound member with $self: call existing: explicit self"
+	];
+	
+	Test[
+		obj@member[arg]
+		,
+		$Failed
+		,
+		Message[Object::objectMember, obj, member[arg], {Object}]
+		,
+		TestID -> "Bound member with $self: \
+call non-existing with head same as existing"
+	];
+	Test[
+		obj[member[arg], otherObj]
+		,
+		$Failed
+		,
+		Message[Object::objectMember, otherObj, member[arg], {Object}]
+		,
+		TestID -> "Bound member with $self: \
+call non-existing with head same as existing: explicit self"
+	];
+	
+	Test[
+		obj@member[] =.
+		,
+		Null
+		,
+		TestID -> "Bound member with $self: unset"
+	];
+	
+	Test[
+		obj@member[]
+		,
+		$Failed
+		,
+		Message[Object::objectMember, obj, member[], {Object}]
+		,
+		TestID -> "Bound member with $self: call unset"
+	];
+	Test[
+		obj[member[], otherObj]
+		,
+		$Failed
+		,
+		Message[Object::objectMember, otherObj, member[], {Object}]
+		,
+		TestID -> "Bound member with $self: call unset: explicit self"
+	];
 ]
 
 
-Test[
-	obj@getSelf[]
+(* ::Subsection:: *)
+(*Non-inheritable member*)
+
+
+Module[
+	{obj, otherObj, member, value}
 	,
-	obj
-	,
-	TestID -> "Bound member with $self: call existing"
+	DeclareObject[obj];
+	DeclareObject[otherObj];
+	
+	Test[
+		WithOrdinaryObjectSet[obj,
+			obj@member = value
+		]
+		,
+		value
+		,
+		TestID -> "Non-inheritable member: set"
+	];
+	
+	Test[
+		obj@member
+		,
+		value
+		,
+		TestID -> "Non-inheritable member: call existing"
+	];
+	Test[
+		obj[member, otherObj]
+		,
+		$Failed
+		,
+		Message[Object::objectMember, otherObj, member, {Object}]
+		,
+		TestID -> "Non-inheritable member: call existing: explicit self"
+	];
+	
+	Test[
+		obj@member =.
+		,
+		Null
+		,
+		TestID -> "Non-inheritable member: unset"
+	];
+	
+	Test[
+		obj@member
+		,
+		$Failed
+		,
+		Message[Object::objectMember, obj, member, {Object}]
+		,
+		TestID -> "Non-inheritable member: call unset"
+	];
+	Test[
+		obj[member, otherObj]
+		,
+		$Failed
+		,
+		Message[Object::objectMember, otherObj, member, {Object}]
+		,
+		TestID -> "Non-inheritable member: call unset: explicit self"
+	];
 ]
 
 
-Test[
-	obj@getSelf[5]
-	,
-	$Failed
-	,
-	Message[Object::objectMember, obj, getSelf[5], {Object}]
-	,
-	TestID ->
-		"Bound member with $self: call non-existing with head same as existing"
-]
+(* ::Subsection:: *)
+(*Inheritable-only member*)
 
 
-Test[
-	obj@getSelf[] =.
+Module[
+	{obj, otherObj, member, value}
 	,
-	Null
-	,
-	TestID -> "Bound member with $self: unset"
-]
-
-
-Test[
-	obj@getSelf[]
-	,
-	$Failed
-	,
-	Message[Object::objectMember, obj, getSelf[], {Object}]
-	,
-	TestID -> "Bound member with $self: call unset"
+	DeclareObject[obj];
+	DeclareObject[otherObj];
+	
+	Test[
+		WithOrdinaryObjectSet[obj,
+			obj[member[], self_] := {value, self}
+		]
+		,
+		Null
+		,
+		TestID -> "Inheritable-only member: set"
+	];
+	
+	Test[
+		obj@member[]
+		,
+		$Failed
+		,
+		Message[Object::objectMember, obj, member[], {Object}]
+		,
+		TestID -> "Inheritable-only member: call existing"
+	];
+	Test[
+		obj[member[], otherObj]
+		,
+		{value, otherObj}
+		,
+		TestID -> "Inheritable-only member: call existing: explicit self"
+	];
+	
+	Test[
+		obj@member[] =.
+		,
+		Null
+		,
+		TestID -> "Inheritable-only member: unset"
+	];
+	
+	Test[
+		obj@member[]
+		,
+		$Failed
+		,
+		Message[Object::objectMember, obj, member[], {Object}]
+		,
+		TestID -> "Inheritable-only member: call unset"
+	];
+	Test[
+		obj[member[], otherObj]
+		,
+		$Failed
+		,
+		Message[Object::objectMember, otherObj, member[], {Object}]
+		,
+		TestID -> "Inheritable-only member: call unset: explicit self"
+	];
 ]
 
 
