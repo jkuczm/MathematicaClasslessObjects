@@ -1,9 +1,15 @@
 TestSuite[{
-	"ObjectDeclaration.mt",
-	"ParentChanging.mt",
+	"ObjectDeclaration.mt"
+	,
+	"ParentChanging.mt"
+	,
 	"MembersNoInheritance.mt",
 	"MembersOneLevelInheritance.mt",
 	"MembersTwoLevelInheritance.mt",
-	"MembersExplicitSelf.mt",
+	"MembersExplicitSelf.mt"
+	,
+	"SettersNoInheritance.mt",
+	"SettersOneLevelInheritance.mt"
+	,
 	"ProtectedObjects.mt"
 }]
