@@ -5,6 +5,7 @@ TestSuite[{
 	"Unit/Object.mt",
 	"Unit/WithOrdinaryObjectSet.mt",
 	"Unit/SetSuper.mt",
+	"Unit/withBoundSelf.mt",
 	"Unit/setMember.mt",
 	"Unit/bindMember.mt",
 	"Unit/unsetMember.mt",
