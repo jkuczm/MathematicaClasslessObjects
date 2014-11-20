@@ -107,6 +107,15 @@ returns list of ancestors of given object obj up to object ances if ances is \
 one of obj ancestors. Otherwise returns list of all ancestors."
 
 
+ClearAll[withBoundSelf]
+
+withBoundSelf::usage =
+"\
+withBoundSelf[self, body] \
+evaluates body with $self variable representing given object self. \
+Returns result of body evaluation."
+
+
 ClearAll[setMember]
 
 setMember::usage =
@@ -308,6 +317,25 @@ SetSuper[arg1_, arg2_ /; !ObjectQ[arg2]] := "nothing" /;
 	Message[Object::object, HoldForm[2], HoldForm[SetSuper[arg1, arg2]]]
 
 fixArgumentsNumber[SetSuper, 2]
+
+
+(* ::Subsection:: *)
+(*withBoundSelf*)
+
+
+SetAttributes[withBoundSelf, HoldRest]
+
+
+withBoundSelf[self_?ObjectQ, body_] :=
+	Block[
+		{$self = self}
+		,
+		$self /: Set[$self[lhs_], rhs_] := Set[self[lhs], rhs];
+		$self /: SetDelayed[$self[lhs_], rhs_] := SetDelayed[self[lhs], rhs];
+		$self /: Unset[$self[lhs_]] := Unset[self[lhs]];
+		
+		body
+	]
 
 
 (* ::Subsection:: *)
