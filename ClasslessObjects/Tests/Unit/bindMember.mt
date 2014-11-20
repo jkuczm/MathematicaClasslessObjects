@@ -42,8 +42,8 @@ Module[
 		DownValues[obj]
 		,
 		{
-			HoldPattern[obj[member]] :>  Block[{$self = obj}, value],
-			HoldPattern[obj[member, self_]] :> Block[{$self = self}, value]
+			HoldPattern[obj[member]] :> withBoundSelf[obj, value],
+			HoldPattern[obj[member, self_]] :> withBoundSelf[self, value]
 		}
 		,
 		TestID -> "Set member: object down values"
@@ -73,8 +73,8 @@ Module[
 		DownValues[obj]
 		,
 		{
-			HoldPattern[obj[member]] :>  Block[{$self = obj}, newValue],
-			HoldPattern[obj[member, self_]] :> Block[{$self = self}, newValue]
+			HoldPattern[obj[member]] :> withBoundSelf[obj, newValue],
+			HoldPattern[obj[member, self_]] :> withBoundSelf[self, newValue]
 		}
 		,
 		TestID -> "Reset member: object down values"
@@ -141,8 +141,8 @@ Module[
 		DownValues[obj]
 		,
 		{
-			HoldPattern[obj[member]] :>  Block[{$self = obj}, oldValue],
-			HoldPattern[obj[member, self_]] :> Block[{$self = self}, oldValue]
+			HoldPattern[obj[member]] :> withBoundSelf[obj, oldValue],
+			HoldPattern[obj[member, self_]] :> withBoundSelf[self, oldValue]
 		}
 		,
 		TestID -> "Reset member: object down values"

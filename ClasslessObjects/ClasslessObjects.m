@@ -372,13 +372,13 @@ bindMember[obj_?ObjectQ, lhs_, rhs_] :=
 		(* Don't duplicate SetDelayed::write warning if object is protected. *)
 		Quiet[
 			(* Inheritable definition providing $self variable. *)
-			obj[lhs, self_] := Block[{$self = self}, rhs]
+			obj[lhs, self_] := withBoundSelf[self, rhs]
 			,
 			SetDelayed::write
 		];
 		
 		(* Ordinary definition providing $self variable. *)
-		obj[lhs] := Block[{$self = obj}, rhs]
+		obj[lhs] := withBoundSelf[obj, rhs]
 	]
 
 
