@@ -344,16 +344,7 @@ SetAttributes[setMember, HoldRest]
 
 setMember[obj_?ObjectQ, lhs_, rhs_] :=
 	WithOrdinaryObjectSet[obj,
-		(* Don't duplicate Set::write warning if object is protected. *)
-		Quiet[
-			(* Definition that makes member inheritable. *)
-			obj[lhs, _] = rhs
-			,
-			Set::write
-		];
-		
-		(* Ordinary definition. *)
-		obj[lhs] = rhs
+		obj[lhs, _:obj] = rhs
 	]
 
 
@@ -366,16 +357,7 @@ SetAttributes[bindMember, HoldRest]
 
 bindMember[obj_?ObjectQ, lhs_, rhs_] :=
 	WithOrdinaryObjectSet[obj,
-		(* Don't duplicate SetDelayed::write warning if object is protected. *)
-		Quiet[
-			(* Inheritable definition providing $self variable. *)
-			obj[lhs, self_] := withBoundSelf[self, rhs]
-			,
-			SetDelayed::write
-		];
-		
-		(* Ordinary definition providing $self variable. *)
-		obj[lhs] := withBoundSelf[obj, rhs]
+		obj[lhs, self_:obj] := withBoundSelf[self, rhs]
 	]
 
 
@@ -387,51 +369,49 @@ SetAttributes[unsetMember, HoldRest]
 
 
 unsetMember[obj_?ObjectQ, lhs_] :=
-	WithOrdinaryObjectSet[obj,
-		Module[
-			{
-				inherUnbound, inherBound, nonInher,
-				norepCount = 0
-			}
-			,
-			Quiet[
-				(*
-					Unset definition with unnamed second pattern.
-					It exists for inheritable unbound members.
-				*)
-				Check[
-					inherUnbound = (obj[lhs, _] =.),
-					norepCount++,
-					Unset::norep
-				];
-				(*
-					Unset definitions with named second pattern.
-					It exists for inheritable bound members.
-				*)
-				Check[
-					inherBound = (obj[lhs, self_] =.),
-					norepCount++,
-					Unset::norep
-				];
-				,
-				{Unset::norep, Unset::write}
+	Module[
+		{norepNo = 0, countNorep, results}
+		,
+		If[MemberQ[Attributes[obj], Protected],
+			Message[Unset::write, HoldForm[obj], HoldForm[obj@lhs]];
+			Return[$Failed]
+		];
+		
+		countNorep =
+			Function[expr, Check[expr, norepNo++, Unset::norep], HoldAll];
+		
+		Quiet[
+			WithOrdinaryObjectSet[obj,
+				results = {
+					(* Non-inheritable member. *)
+					countNorep[obj[lhs] =.]
+					,
+					(* Inheritable-only unbound member. *)
+					countNorep[obj[lhs, _] =.]
+					,
+					(* Inheritable-only bound member. *)
+					countNorep[obj[lhs, self_] =.]
+					,
+					(* Inheritable unbound member. *)
+					countNorep[obj[lhs, _:obj] =.]
+					,
+					(* Inheritable bound member. *)
+					countNorep[obj[lhs, self_:obj] =.]
+				}
 			];
+			,
+			Unset::norep
+		];
 			
-			(*
-				Unset non-inheritable definition. If at leas one of prevoiusly
-				unset definitions existed quiet Unset::norep message.
-			*)
-			nonInher =
-				If[norepCount == 2,
-					obj[lhs] =.
-				(* else *),
-					Quiet[obj[lhs] =., Unset::norep]
-				];
-			
-			If[!MatchQ[Null, inherUnbound | inherBound | nonInher],
-				(* All Upset evaluations failed so return $Failed. *)
-				$Failed
-			]
+		If[norepNo === 5,
+			(*	All Upset evaluations printed Unset::norep,
+				so given member was not defined on given object. *)
+			Message[Unset::norep, HoldForm[obj@lhs], HoldForm[obj]]
+		];
+		
+		If[!MemberQ[results, Null],
+			(* All Upset evaluations failed so return $Failed. *)
+			$Failed
 		]
 	]
 
