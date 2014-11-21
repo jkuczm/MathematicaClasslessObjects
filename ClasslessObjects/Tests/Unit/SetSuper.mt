@@ -472,9 +472,9 @@ Module[
 	Test[
 		FilterRules[UpValues[child], HoldPattern[HoldPattern][_Super]]
 		,
-		{HoldPattern[Super[child]] :> Object}
+		{}
 		,
-		TestID -> "Successful: remove parent: child has proper super up value"
+		TestID -> "Successful: remove parent: child has no super up value"
 	];
 	TestMatch[
 		DownValues[child]
@@ -498,6 +498,49 @@ child has proper inheritance down values"
 		oldDefinitionObject
 		,
 		TestID -> "Successful: remove parent: Object definition"
+	];
+]
+
+
+Module[
+	{child, parent, parentOldDefinition, oldDefinitionObject}
+	,
+	declareMockObject[child];
+	
+	{parentOldDefinition, oldDefinitionObject} =
+		ToString[Definition[#]]& /@ {parent, Object};
+
+	Test[
+		SetSuper[child, Object]
+		,
+		Null
+		,
+		TestID -> "Successful: reassign Object parent: SetSuper evaluation"
+	];
+	
+	Test[
+		FilterRules[UpValues[child], HoldPattern[HoldPattern][_Super]]
+		,
+		{}
+		,
+		TestID ->
+			"Successful: reassign Object parent: child has no super up value"
+	];
+	TestMatch[
+		DownValues[child]
+		,
+		inheritanceDownValues[child, Object]
+		,
+		TestID -> "Successful: reassign Object parent: \
+child has proper inheritance down values"
+	];
+	
+	Test[
+		ToString @ Definition[Object]
+		,
+		oldDefinitionObject
+		,
+		TestID -> "Successful: reassign Object parent: Object definition"
 	];
 ]
 

@@ -54,7 +54,14 @@ Needs["ClasslessObjects`"]
 (*declareMockObject*)
 
 
-declareMockObject[obj_, super_:Object] := (
+declareMockObject[obj_] := (
+	ClearAll[obj];
+	
+	ObjectQ[obj] ^= True;
+)
+
+
+declareMockObject[obj_, super_] := (
 	ClearAll[obj];
 	
 	ObjectQ[obj] ^= True;

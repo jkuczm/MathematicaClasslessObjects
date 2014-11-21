@@ -164,6 +164,8 @@ fixArgumentsNumber[ObjectQ, 1]
 (*Super*)
 
 
+Super[_?ObjectQ] = Object
+
 Super[arg_ /; !ObjectQ[arg]] := "nothing" /;
 	Message[Object::object, HoldForm[1], HoldForm[Super[arg]]]
 
@@ -213,8 +215,6 @@ fixArgumentsNumber[Object, 2]
 
 
 ObjectQ[Object] ^= True
-
-Super[Object] ^= Object
 
 
 (* ::Subsection:: *)
@@ -282,7 +282,15 @@ SetSuper[obj_?ObjectQ, super_?ObjectQ] := (
 		]
 	];
 	
-	Super[obj] ^= super;
+	If[super === Object,
+		Quiet[
+			obj /: Super[obj] =.
+			,
+			TagUnset::norep
+		]
+	(* else *),
+		Super[obj] ^= super
+	];
 	
 	WithOrdinaryObjectSet[obj,
 		(* Delegate any undefinded member call to parent object. *)
