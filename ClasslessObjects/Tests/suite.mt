@@ -5,6 +5,7 @@ TestSuite[{
 	"Unit/Object.mt",
 	"Unit/WithOrdinaryObjectSet.mt",
 	"Unit/SetSuper.mt",
+	"Unit/withBoundSelf.mt",
 	"Unit/setMember.mt",
 	"Unit/bindMember.mt",
 	"Unit/unsetMember.mt",
@@ -16,5 +17,7 @@ TestSuite[{
 	"Integration/MembersOneLevelInheritance.mt",
 	"Integration/MembersTwoLevelInheritance.mt",
 	"Integration/MembersExplicitSelf.mt",
+	"Integration/SettersNoInheritance.mt",
+	"Integration/SettersOneLevelInheritance.mt",
 	"Integration/ProtectedObjects.mt"
 }]

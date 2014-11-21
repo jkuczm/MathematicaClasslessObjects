@@ -107,6 +107,15 @@ returns list of ancestors of given object obj up to object ances if ances is \
 one of obj ancestors. Otherwise returns list of all ancestors."
 
 
+ClearAll[withBoundSelf]
+
+withBoundSelf::usage =
+"\
+withBoundSelf[self, body] \
+evaluates body with $self variable representing given object self. \
+Returns result of body evaluation."
+
+
 ClearAll[setMember]
 
 setMember::usage =
@@ -311,6 +320,25 @@ fixArgumentsNumber[SetSuper, 2]
 
 
 (* ::Subsection:: *)
+(*withBoundSelf*)
+
+
+SetAttributes[withBoundSelf, HoldRest]
+
+
+withBoundSelf[self_?ObjectQ, body_] :=
+	Block[
+		{$self = self}
+		,
+		$self /: Set[$self[lhs_], rhs_] := Set[self[lhs], rhs];
+		$self /: SetDelayed[$self[lhs_], rhs_] := SetDelayed[self[lhs], rhs];
+		$self /: Unset[$self[lhs_]] := Unset[self[lhs]];
+		
+		body
+	]
+
+
+(* ::Subsection:: *)
 (*setMember*)
 
 
@@ -344,13 +372,13 @@ bindMember[obj_?ObjectQ, lhs_, rhs_] :=
 		(* Don't duplicate SetDelayed::write warning if object is protected. *)
 		Quiet[
 			(* Inheritable definition providing $self variable. *)
-			obj[lhs, self_] := Block[{$self = self}, rhs]
+			obj[lhs, self_] := withBoundSelf[self, rhs]
 			,
 			SetDelayed::write
 		];
 		
 		(* Ordinary definition providing $self variable. *)
-		obj[lhs] := Block[{$self = obj}, rhs]
+		obj[lhs] := withBoundSelf[obj, rhs]
 	]
 
 
