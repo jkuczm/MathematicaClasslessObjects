@@ -142,7 +142,7 @@ Module[
 	{obj, member, value}
 	,
 	ObjectQ[obj] ^= True;
-	obj[member, self_] := self + value;
+	obj[member, self_] := {value, self};
 	
 	Test[
 		unsetMember[obj, member]
@@ -170,8 +170,7 @@ Module[
 	{obj, member, value}
 	,
 	ObjectQ[obj] ^= True;
-	obj[member] = value;
-	obj[member, _] = value;
+	obj[member, _:obj] = value;
 	
 	Test[
 		unsetMember[obj, member]
@@ -199,8 +198,7 @@ Module[
 	{obj, member, value}
 	,
 	ObjectQ[obj] ^= True;
-	obj[member] := value;
-	obj[member, _] := value;
+	obj[member, self_:obj] := {value, self};
 	
 	Test[
 		unsetMember[obj, member]
@@ -361,7 +359,7 @@ Module[
 	{obj, member, value, downValues}
 	,
 	ObjectQ[obj] ^= True;
-	obj[member, self_] := self + value;
+	obj[member, self_] := {value, self};
 	Protect[obj];
 	downValues = DownValues[obj];
 	
@@ -395,8 +393,7 @@ Module[
 	{obj, member, value, downValues}
 	,
 	ObjectQ[obj] ^= True;
-	obj[member] = value;
-	obj[member, _] = value;
+	obj[member, _:obj] = value;
 	Protect[obj];
 	downValues = DownValues[obj];
 	
@@ -428,8 +425,7 @@ Module[
 	{obj, member, value, downValues}
 	,
 	ObjectQ[obj] ^= True;
-	obj[member] := value;
-	obj[member, _] := value;
+	obj[member, self_:obj] := {value, self};
 	Protect[obj];
 	downValues = DownValues[obj];
 	

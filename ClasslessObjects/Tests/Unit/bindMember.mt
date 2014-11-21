@@ -41,10 +41,7 @@ Module[
 	Test[
 		DownValues[obj]
 		,
-		{
-			HoldPattern[obj[member]] :> withBoundSelf[obj, value],
-			HoldPattern[obj[member, self_]] :> withBoundSelf[self, value]
-		}
+		{HoldPattern[obj[member, self_:obj]] :> withBoundSelf[self, value]}
 		,
 		TestID -> "Set member: object down values"
 	];
@@ -72,10 +69,7 @@ Module[
 	Test[
 		DownValues[obj]
 		,
-		{
-			HoldPattern[obj[member]] :> withBoundSelf[obj, newValue],
-			HoldPattern[obj[member, self_]] :> withBoundSelf[self, newValue]
-		}
+		{HoldPattern[obj[member, self_:obj]] :> withBoundSelf[self, newValue]}
 		,
 		TestID -> "Reset member: object down values"
 	];
@@ -101,7 +95,9 @@ Module[
 		,
 		$Failed
 		,
-		Message[SetDelayed::write, obj, obj@member]
+		Message[SetDelayed::write,
+			obj, obj[member, HoldPattern[Optional][HoldPattern[_], obj]]
+		]
 		,
 		TestID -> "Set member: bindMember evaluation"
 	];
@@ -132,7 +128,9 @@ Module[
 		,
 		$Failed
 		,
-		Message[SetDelayed::write, obj, obj@member]
+		Message[SetDelayed::write,
+			obj, obj[member, HoldPattern[Optional][HoldPattern[_], obj]]
+		]
 		,
 		TestID -> "Reset member: bindMember evaluation"
 	];
@@ -140,10 +138,7 @@ Module[
 	Test[
 		DownValues[obj]
 		,
-		{
-			HoldPattern[obj[member]] :> withBoundSelf[obj, oldValue],
-			HoldPattern[obj[member, self_]] :> withBoundSelf[self, oldValue]
-		}
+		{HoldPattern[obj[member, self_:obj]] :> withBoundSelf[self, oldValue]}
 		,
 		TestID -> "Reset member: object down values"
 	];

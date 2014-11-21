@@ -26,8 +26,8 @@ ClearAll[inheritanceDownValues]
 inheritanceDownValues::usage =
 "\
 inheritanceDownValues[child, parent] \
-returns list containing two down value rules that let child inherit members \
-from parent."
+returns list containing down value rule that let child inherit members from \
+parent."
 
 
 Unprotect[setAlteringUpValues]
@@ -74,15 +74,13 @@ declareMockObject[obj_, super_] := (
 
 
 inheritanceDownValues[child_, parent_] := {
-	HoldPattern[HoldPattern][
-		HoldPattern[child][HoldPattern[Pattern][x_, Blank[]]]
-	] :>
-		parent[x_, child]
-	,
 	HoldPattern[HoldPattern][HoldPattern[child][
-		HoldPattern[Pattern][x_, Blank[]],
-		HoldPattern[Pattern][self_, Blank[]]]
-	] :>
+		HoldPattern[Pattern][x_, HoldPattern[Blank][]],
+		HoldPattern[Optional][
+			HoldPattern[Pattern][self_, HoldPattern[Blank][]],
+			child
+		]
+	]] :>
 		parent[x_, self_]
 }
 

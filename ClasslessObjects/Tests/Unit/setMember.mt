@@ -41,10 +41,7 @@ Module[
 	Test[
 		DownValues[obj]
 		,
-		{
-			HoldPattern[obj[member]] :> value,
-			HoldPattern[obj[member, _]] :> value
-		}
+		{HoldPattern[obj[member, _:obj]] :> value}
 		,
 		TestID -> "Set member: object down values"
 	];
@@ -72,10 +69,7 @@ Module[
 	Test[
 		DownValues[obj]
 		,
-		{
-			HoldPattern[obj[member]] :> newValue,
-			HoldPattern[obj[member, _]] :> newValue
-		}
+		{HoldPattern[obj[member, _:obj]] :> newValue}
 		,
 		TestID -> "Reset member: object down values"
 	];
@@ -101,7 +95,9 @@ Module[
 		,
 		value
 		,
-		Message[Set::write, obj, obj@member]
+		Message[Set::write,
+			obj, obj[member, HoldPattern[Optional][HoldPattern[_], obj]]
+		]
 		,
 		TestID -> "Protected: Set member: setMember evaluation"
 	];
@@ -132,7 +128,9 @@ Module[
 		,
 		newValue
 		,
-		Message[Set::write, obj, obj@member]
+		Message[Set::write,
+			obj, obj[member, HoldPattern[Optional][HoldPattern[_], obj]]
+		]
 		,
 		TestID -> "Protected: Reset member: setMember evaluation"
 	];
@@ -140,10 +138,7 @@ Module[
 	Test[
 		DownValues[obj]
 		,
-		{
-			HoldPattern[obj[member]] :> oldValue,
-			HoldPattern[obj[member, _]] :> oldValue
-		}
+		{HoldPattern[obj[member, _:obj]] :> oldValue}
 		,
 		TestID -> "Protected: Reset member: object down values"
 	];
