@@ -54,7 +54,7 @@ Module[
 		,
 		value
 		,
-		Message[Set::write, obj, obj[member, _]]
+		Message[Set::write, obj, obj[member, HoldPattern[_]]]
 		,
 		TestID -> "Set: inheritable-only member"
 	]
@@ -72,7 +72,9 @@ Module[
 		,
 		value
 		,
-		Message[Set::write, obj, obj@member]
+		Message[Set::write,
+			obj, obj[member, HoldPattern[Optional][HoldPattern[_], obj]]
+		]
 		,
 		TestID -> "Set: inheritable member"
 	]
@@ -116,7 +118,7 @@ Module[
 		,
 		$Failed
 		,
-		Message[SetDelayed::write, obj, obj[member, _]]
+		Message[SetDelayed::write, obj, obj[member, HoldPattern[_]]]
 		,
 		TestID -> "SetDelayed: inheritable-only member"
 	]
@@ -134,7 +136,9 @@ Module[
 		,
 		$Failed
 		,
-		Message[SetDelayed::write, obj, obj@member]
+		Message[SetDelayed::write,
+			obj, obj[member, HoldPattern[Optional][HoldPattern[_], obj]]
+		]
 		,
 		TestID -> "SetDelayed: inheritable member"
 	]
@@ -178,7 +182,7 @@ Module[
 		,
 		$Failed
 		,
-		Message[Unset::write, obj, obj[member, _]]
+		Message[Unset::write, obj, obj[member, HoldPattern[_]]]
 		,
 		TestID -> "Unset: inheritable-only member"
 	]
