@@ -303,10 +303,7 @@ SetSuper[obj_?ObjectQ, super_?ObjectQ] := (
 	
 	WithOrdinaryObjectSet[obj,
 		(* Delegate any undefinded member call to parent object. *)
-		(* For calls directly on this object. *)
-		obj[x_] := super[x, obj];
-		(* For calls on objects inheriting from this object. *)
-		obj[x_, self_] := super[x, self]
+		obj[x_, self_:obj] := super[x, self]
 	]
 )
 	
