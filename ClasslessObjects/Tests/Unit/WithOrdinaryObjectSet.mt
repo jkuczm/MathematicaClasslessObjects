@@ -76,15 +76,103 @@ Module[
 ]
 
 
-TestMatch[
-	WithOrdinaryObjectSet[arg1, arg2]
+Module[
+	{arg1, arg2}
 	,
-	HoldPattern @ WithOrdinaryObjectSet[arg1, arg2]
+	TestMatch[
+		WithOrdinaryObjectSet[arg1, arg2]
+		,
+		HoldPattern @ WithOrdinaryObjectSet[arg1, arg2]
+		,
+		Message[Object::objects, 1, WithOrdinaryObjectSet[arg1, arg2], arg1]
+		,
+		TestID -> "2 args: first non-object: evaluation"
+	]
+]
+
+Module[
+	{arg2}
 	,
-	Message[Object::object, 1, WithOrdinaryObjectSet[arg1, arg2]]
+	TestMatch[
+		WithOrdinaryObjectSet[{}, arg2]
+		,
+		HoldPattern @ WithOrdinaryObjectSet[{}, arg2]
+		,
+		Message[Object::objects, 1, WithOrdinaryObjectSet[{}, arg2], {}]
+		,
+		TestID -> "2 args: first empty list: evaluation"
+	]
+]
+
+Module[
+	{nonObj1, arg2}
 	,
-	TestID -> "2 args: first non-object: evaluation"
-];
+	TestMatch[
+		WithOrdinaryObjectSet[{nonObj1}, arg2]
+		,
+		HoldPattern @ WithOrdinaryObjectSet[{nonObj1}, arg2]
+		,
+		Message[Object::objects,
+			1, WithOrdinaryObjectSet[{nonObj1}, arg2], {nonObj1}
+		]
+		,
+		TestID -> "2 args: first list with non-obj: evaluation"
+	]
+]
+
+Module[
+	{nonObj1, nonObj2, arg2}
+	,
+	TestMatch[
+		WithOrdinaryObjectSet[{nonObj1, nonObj2}, arg2]
+		,
+		HoldPattern @ WithOrdinaryObjectSet[{nonObj1, nonObj2}, arg2]
+		,
+		Message[Object::objects,
+			1,
+			WithOrdinaryObjectSet[{nonObj1, nonObj2}, arg2],
+			{nonObj1, nonObj2}
+		]
+		,
+		TestID -> "2 args: first list with 2 non-objs: evaluation"
+	]
+]
+
+Module[
+	{obj, oldUpValues, oldAttributes}
+	,
+	declareMockObjectWithAlteredSetUpValues[obj];
+	
+	oldUpValues = UpValues[obj];
+	oldAttributes = Attributes[obj];
+	
+	TestMatch[
+		WithOrdinaryObjectSet[{obj, nonObj2}, arg2]
+		,
+		HoldPattern @ WithOrdinaryObjectSet[{obj, nonObj2}, arg2]
+		,
+		Message[Object::objects,
+			1, WithOrdinaryObjectSet[{obj, nonObj2}, arg2], {nonObj2}
+		]
+		,
+		TestID -> "2 args: first list with obj and non-obj: evaluation"
+	];
+	
+	Test[
+		UpValues[obj]
+		,
+		oldUpValues
+		,
+		TestID -> "2 args: after: UpValues"
+	];
+	Test[
+		Attributes[obj]
+		,
+		oldAttributes
+		,
+		TestID -> "2 args: after: Attributes"
+	];
+]
 
 
 Module[
@@ -189,6 +277,101 @@ Module[
 ]
 
 
+Module[
+	{
+		evaluationResult,
+		obj1, obj2,
+		oldUpValues1, oldUpValues2, oldAttributes1, oldAttributes2,
+		upValuesInside1, upValuesInside2, attributesInside1, attributesInside2,
+		something1, something2,
+		value1, value2
+	}
+	,
+	declareMockObjectWithAlteredSetUpValues /@ {obj1, obj2};
+	
+	{oldUpValues1, oldUpValues2} = UpValues /@ {obj1, obj2};
+	{oldAttributes1, oldAttributes2} = Attributes /@ {obj1, obj2};
+	
+	Test[
+		WithOrdinaryObjectSet[{obj1, obj2},
+			{upValuesInside1, upValuesInside2} = UpValues /@ {obj1, obj2};
+			{attributesInside1, attributesInside2} =
+				Attributes /@ {obj1, obj2};
+			
+			UpValues[obj1] = {HoldPattern[something1[obj1]] :> value1};
+			UpValues[obj2] = {HoldPattern[something2[obj2]] :> value2};
+			
+			evaluationResult
+		]
+		,
+		evaluationResult
+		,
+		TestID -> "non-protected: list: evaluation"
+	];
+	
+	Test[
+		upValuesInside1
+		,
+		{HoldPattern[ObjectQ[obj1]] :> True}
+		,
+		TestID -> "non-protected: list: inside: UpValues: first object"
+	];
+	Test[
+		upValuesInside2
+		,
+		{HoldPattern[ObjectQ[obj2]] :> True}
+		,
+		TestID -> "non-protected: list: inside: UpValues: second object"
+	];
+	
+	Test[
+		attributesInside1
+		,
+		oldAttributes1
+		,
+		TestID -> "non-protected: list: inside: Attributes: first object"
+	];
+	Test[
+		attributesInside2
+		,
+		oldAttributes2
+		,
+		TestID -> "non-protected: list: inside: Attributes: second object"
+	];
+	
+	
+	Test[
+		UpValues[obj1]
+		,
+		oldUpValues1
+		,
+		TestID -> "non-protected: list: after: UpValues: first object"
+	];
+	Test[
+		UpValues[obj2]
+		,
+		oldUpValues2
+		,
+		TestID -> "non-protected: list: after: UpValues: second object"
+	];
+	
+	Test[
+		Attributes[obj1]
+		,
+		oldAttributes1
+		,
+		TestID -> "non-protected: list: after: Attributes: first object"
+	];
+	Test[
+		Attributes[obj1]
+		,
+		oldAttributes2
+		,
+		TestID -> "non-protected: list: after: Attributes: second object"
+	];
+]
+
+
 (* ::Subsubsection:: *)
 (*Protected object*)
 
@@ -247,6 +430,96 @@ Module[
 		oldAttributes
 		,
 		TestID -> "protected: after: Attributes"
+	];
+]
+
+
+Module[
+	{
+		evaluationResult,
+		obj1, obj2,
+		oldUpValues1, oldUpValues2, oldAttributes1, oldAttributes2,
+		upValuesInside1, upValuesInside2, attributesInside1, attributesInside2
+	}
+	,
+	declareMockObjectWithAlteredSetUpValues /@ {obj1, obj2};
+	
+	{oldUpValues1, oldUpValues2} = UpValues /@ {obj1, obj2};
+	{oldAttributes1, oldAttributes2} = Attributes /@ {obj1, obj2};
+	
+	Test[
+		WithOrdinaryObjectSet[{obj1, obj2},
+			{upValuesInside1, upValuesInside2} = UpValues /@ {obj1, obj2};
+			{attributesInside1, attributesInside2} =
+				Attributes /@ {obj1, obj2};
+			
+			evaluationResult
+		]
+		,
+		evaluationResult
+		,
+		TestID -> "protected: list: evaluation"
+	];
+	
+	Test[
+		upValuesInside1
+		,
+		{HoldPattern[ObjectQ[obj1]] :> True}
+		,
+		TestID -> "protected: list: inside: UpValues: first object"
+	];
+	Test[
+		upValuesInside2
+		,
+		{HoldPattern[ObjectQ[obj2]] :> True}
+		,
+		TestID -> "protected: list: inside: UpValues: second object"
+	];
+	
+	Test[
+		attributesInside1
+		,
+		oldAttributes1
+		,
+		TestID -> "protected: list: inside: Attributes: first object"
+	];
+	Test[
+		attributesInside2
+		,
+		oldAttributes2
+		,
+		TestID -> "protected: list: inside: Attributes: second object"
+	];
+	
+	
+	Test[
+		UpValues[obj1]
+		,
+		oldUpValues1
+		,
+		TestID -> "protected: list: after: UpValues: first object"
+	];
+	Test[
+		UpValues[obj2]
+		,
+		oldUpValues2
+		,
+		TestID -> "protected: list: after: UpValues: second object"
+	];
+	
+	Test[
+		Attributes[obj1]
+		,
+		oldAttributes1
+		,
+		TestID -> "protected: list: after: Attributes: first object"
+	];
+	Test[
+		Attributes[obj1]
+		,
+		oldAttributes2
+		,
+		TestID -> "protected: list: after: Attributes: second object"
 	];
 ]
 
