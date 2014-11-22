@@ -151,7 +151,7 @@ unsets ordinary: obj[member] and inheritable: obj[member, self_] definitions."
 (*fixArgumentsNumber*)
 
 
-fixArgumentsNumber[sym_Symbol, argNo_Integer] :=
+fixArgumentsNumber[sym_Symbol, argNo_Integer] := (
 	If[argNo === 1,
 		sym[args___] := "nothing" /;
 			With[
@@ -179,7 +179,10 @@ fixArgumentsNumber[sym_Symbol, argNo_Integer] :=
 						]
 				]
 			];
-	]
+	];
+	
+	SyntaxInformation[sym] = {"ArgumentsPattern" -> ConstantArray[_, argNo]};
+)
 
 
 (* ::Subsection:: *)
@@ -522,6 +525,9 @@ DeclareObject[args___ /; !MatchQ[Length[{args}], 1 | 2]] := "nothing" /;
 		HoldForm[1],
 		HoldForm[2]
 	]
+
+
+SyntaxInformation[DeclareObject] = {"ArgumentsPattern" -> {_, _.}};
 
 
 End[]
