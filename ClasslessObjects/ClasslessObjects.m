@@ -246,7 +246,7 @@ WithOrdinaryObjectSet[obj_?ObjectQ, body_] :=
 
 WithOrdinaryObjectSet[objs:{__?ObjectQ}, body_] :=
 	Module[
-		{protected, wrapper, result}
+		{protected, wrapper}
 		,
 		protected = Unprotect @@ objs;
 		(*
@@ -276,16 +276,24 @@ WithOrdinaryObjectSet[objs:{__?ObjectQ}, body_] :=
 		];
 		Protect @@ protected;
 		
-		result = body;
-		
-		Unprotect @@ protected;
-		Scan[
-			(UpValues[#] = UpValues[#] /. wrapper[lhs_] :> lhs)&,
-			objs
-		];
-		Protect @@ protected;
-		
-		result
+		CheckAll[
+			body
+			,
+			Function[
+				{result, heldFlowControl}
+				,
+				Unprotect @@ protected;
+				Scan[
+					(UpValues[#] = UpValues[#] /. wrapper[lhs_] :> lhs)&,
+					objs
+				];
+				Protect @@ protected;
+				
+				ReleaseHold[heldFlowControl];
+				
+				result
+			]
+		]
 	]
 	
 WithOrdinaryObjectSet[arg1:{__} /; MemberQ[arg1, _?(!ObjectQ[#]&)], arg2_] :=
