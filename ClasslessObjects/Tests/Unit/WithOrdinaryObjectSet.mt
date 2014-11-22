@@ -21,6 +21,26 @@ declareMockObjectWithAlteredSetUpValues[obj_] := (
 )
 
 
+mockObjectUpValuesPattern[obj_] := {
+	Verbatim[RuleDelayed][
+		Verbatim[HoldPattern][HoldPattern[ObjectQ[obj]]],
+		True
+	],
+	Verbatim[RuleDelayed][
+		Verbatim[HoldPattern][wrapper_Symbol[HoldPattern[obj[_] = _]]],
+		"altered Set"
+	],
+	Verbatim[RuleDelayed][
+		Verbatim[HoldPattern][wrapper_Symbol[HoldPattern[obj[_] := _]]],
+		"altered SetDelayed"
+	],
+	Verbatim[RuleDelayed][
+		Verbatim[HoldPattern][wrapper_Symbol[HoldPattern[obj[_] =. ]]],
+		"altered Unset"
+	]
+}
+
+
 
 (* ::Section:: *)
 (*Tests*)
@@ -222,7 +242,8 @@ Module[
 	{
 		obj, evaluationResult,
 		oldUpValues, oldAttributes,
-		upValuesInside, attributesInside
+		upValuesInside, attributesInside,
+		accessor, value
 	}
 	,
 	declareMockObjectWithAlteredSetUpValues[obj];
@@ -235,7 +256,7 @@ Module[
 			upValuesInside = UpValues[obj];
 			attributesInside = Attributes[obj];
 			
-			UpValues[obj] = {HoldPattern[something[obj]] :> "some value"};
+			accessor[obj] ^= value;
 			
 			evaluationResult
 		]
@@ -245,10 +266,10 @@ Module[
 		TestID -> "non-protected: evaluation"
 	];
 	
-	Test[
+	TestMatch[
 		upValuesInside
 		,
-		{HoldPattern[ObjectQ[obj]] :> True}
+		mockObjectUpValuesPattern[obj]
 		,
 		TestID -> "non-protected: inside: UpValues"
 	];
@@ -263,7 +284,7 @@ Module[
 	Test[
 		UpValues[obj]
 		,
-		oldUpValues
+		Prepend[oldUpValues, HoldPattern[accessor[obj]] :> value]
 		,
 		TestID -> "non-protected: after: UpValues"
 	];
@@ -283,7 +304,7 @@ Module[
 		obj1, obj2,
 		oldUpValues1, oldUpValues2, oldAttributes1, oldAttributes2,
 		upValuesInside1, upValuesInside2, attributesInside1, attributesInside2,
-		something1, something2,
+		accessor1, accessor2,
 		value1, value2
 	}
 	,
@@ -298,8 +319,8 @@ Module[
 			{attributesInside1, attributesInside2} =
 				Attributes /@ {obj1, obj2};
 			
-			UpValues[obj1] = {HoldPattern[something1[obj1]] :> value1};
-			UpValues[obj2] = {HoldPattern[something2[obj2]] :> value2};
+			accessor1[obj1] ^= value1;
+			accessor2[obj2] ^= value2;
 			
 			evaluationResult
 		]
@@ -309,17 +330,17 @@ Module[
 		TestID -> "non-protected: list: evaluation"
 	];
 	
-	Test[
+	TestMatch[
 		upValuesInside1
 		,
-		{HoldPattern[ObjectQ[obj1]] :> True}
+		mockObjectUpValuesPattern[obj1]
 		,
 		TestID -> "non-protected: list: inside: UpValues: first object"
 	];
-	Test[
+	TestMatch[
 		upValuesInside2
 		,
-		{HoldPattern[ObjectQ[obj2]] :> True}
+		mockObjectUpValuesPattern[obj2]
 		,
 		TestID -> "non-protected: list: inside: UpValues: second object"
 	];
@@ -343,14 +364,14 @@ Module[
 	Test[
 		UpValues[obj1]
 		,
-		oldUpValues1
+		Prepend[oldUpValues1, HoldPattern[accessor1[obj1]] :> value1]
 		,
 		TestID -> "non-protected: list: after: UpValues: first object"
 	];
 	Test[
 		UpValues[obj2]
 		,
-		oldUpValues2
+		Prepend[oldUpValues2, HoldPattern[accessor2[obj2]] :> value2]
 		,
 		TestID -> "non-protected: list: after: UpValues: second object"
 	];
@@ -402,10 +423,10 @@ Module[
 		TestID -> "protected: evaluation"
 	];
 	
-	Test[
+	TestMatch[
 		upValuesInside
 		,
-		{HoldPattern[ObjectQ[obj]] :> True}
+		mockObjectUpValuesPattern[obj]
 		,
 		TestID -> "protected: inside: UpValues"
 	];
@@ -461,17 +482,17 @@ Module[
 		TestID -> "protected: list: evaluation"
 	];
 	
-	Test[
+	TestMatch[
 		upValuesInside1
 		,
-		{HoldPattern[ObjectQ[obj1]] :> True}
+		mockObjectUpValuesPattern[obj1]
 		,
 		TestID -> "protected: list: inside: UpValues: first object"
 	];
-	Test[
+	TestMatch[
 		upValuesInside2
 		,
-		{HoldPattern[ObjectQ[obj2]] :> True}
+		mockObjectUpValuesPattern[obj2]
 		,
 		TestID -> "protected: list: inside: UpValues: second object"
 	];
