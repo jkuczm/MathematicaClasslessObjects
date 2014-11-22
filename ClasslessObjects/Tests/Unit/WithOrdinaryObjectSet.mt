@@ -104,7 +104,9 @@ Module[
 		,
 		HoldPattern @ WithOrdinaryObjectSet[arg1, arg2]
 		,
-		Message[Object::objects, 1, WithOrdinaryObjectSet[arg1, arg2], arg1]
+		Message[WithOrdinaryObjectSet::objects,
+			1, WithOrdinaryObjectSet[arg1, arg2], arg1
+		]
 		,
 		TestID -> "2 args: first non-object: evaluation"
 	]
@@ -118,7 +120,9 @@ Module[
 		,
 		HoldPattern @ WithOrdinaryObjectSet[{}, arg2]
 		,
-		Message[Object::objects, 1, WithOrdinaryObjectSet[{}, arg2], {}]
+		Message[WithOrdinaryObjectSet::objects,
+			1, WithOrdinaryObjectSet[{}, arg2], {}
+		]
 		,
 		TestID -> "2 args: first empty list: evaluation"
 	]
@@ -132,7 +136,7 @@ Module[
 		,
 		HoldPattern @ WithOrdinaryObjectSet[{nonObj1}, arg2]
 		,
-		Message[Object::objects,
+		Message[WithOrdinaryObjectSet::objects,
 			1, WithOrdinaryObjectSet[{nonObj1}, arg2], {nonObj1}
 		]
 		,
@@ -148,7 +152,7 @@ Module[
 		,
 		HoldPattern @ WithOrdinaryObjectSet[{nonObj1, nonObj2}, arg2]
 		,
-		Message[Object::objects,
+		Message[WithOrdinaryObjectSet::objects,
 			1,
 			WithOrdinaryObjectSet[{nonObj1, nonObj2}, arg2],
 			{nonObj1, nonObj2}
@@ -171,7 +175,7 @@ Module[
 		,
 		HoldPattern @ WithOrdinaryObjectSet[{obj, nonObj2}, arg2]
 		,
-		Message[Object::objects,
+		Message[WithOrdinaryObjectSet::objects,
 			1, WithOrdinaryObjectSet[{obj, nonObj2}, arg2], {nonObj2}
 		]
 		,

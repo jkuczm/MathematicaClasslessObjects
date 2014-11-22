@@ -35,7 +35,7 @@ TestMatch[
 	,
 	HoldPattern @ Super[sym]
 	,
-	Message[Object::object, 1, Super[sym]]
+	Message[Super::object, 1, Super[sym]]
 	,
 	TestID -> "1 arg: non-object"
 ]

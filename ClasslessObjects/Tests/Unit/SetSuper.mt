@@ -80,8 +80,8 @@ Module[
 		HoldPattern @ SetSuper[arg1, arg2]
 		,
 		{
-			Message[Object::object, 1, SetSuper[arg1, arg2]],
-			Message[Object::object, 2, SetSuper[arg1, arg2]]
+			Message[SetSuper::object, 1, SetSuper[arg1, arg2]],
+			Message[SetSuper::object, 2, SetSuper[arg1, arg2]]
 		}
 		,
 		TestID -> "2 args: both non-objects: SetSuper evaluation"
@@ -117,7 +117,7 @@ Module[
 		,
 		HoldPattern @ SetSuper[arg1, arg2]
 		,
-		Message[Object::object, 1, SetSuper[arg1, arg2]]
+		Message[SetSuper::object, 1, SetSuper[arg1, arg2]]
 		,
 		TestID -> "2 args: non-object, object: SetSuper evaluation"
 	];
@@ -152,7 +152,7 @@ Module[
 		,
 		HoldPattern @ SetSuper[arg1, arg2]
 		,
-		Message[Object::object, 2, SetSuper[arg1, arg2]]
+		Message[SetSuper::object, 2, SetSuper[arg1, arg2]]
 		,
 		TestID -> "2 args: object, non-object: SetSuper evaluation"
 	];

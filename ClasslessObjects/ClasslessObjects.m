@@ -148,6 +148,19 @@ unsets ordinary: obj[member] and inheritable: obj[member, self_] definitions."
 
 
 (* ::Subsection:: *)
+(*General messages*)
+
+
+general::object = "Object expected at position `1` in `2`."
+
+general::objects =
+"Object or non-empty list of objects expected at position `1` in `2`. \
+Argument contained following non-object(s): `3`."
+
+general::nonObject = "Non-object expected at position `1` in `2`."
+
+
+(* ::Subsection:: *)
 (*fixArgumentsNumber*)
 
 
@@ -198,10 +211,13 @@ fixArgumentsNumber[ObjectQ, 1]
 (*Super*)
 
 
+Super::object = general::object
+
+
 Super[_?ObjectQ] = Object
 
 Super[arg_ /; !ObjectQ[arg]] := "nothing" /;
-	Message[Object::object, HoldForm[1], HoldForm[Super[arg]]]
+	Message[Super::object, HoldForm[1], HoldForm[Super[arg]]]
 
 fixArgumentsNumber[Super, 1]
 
@@ -221,14 +237,6 @@ getInheritanceChain[obj_?ObjectQ, ances_:Object] /; ObjectQ[ances] :=
 (* ::Subsection:: *)
 (*Object*)
 
-
-Object::object = "Object expected at position `1` in `2`."
-
-Object::objects =
-"Object or non-empty list of objects expected at position `1` in `2`. \
-Argument contained following non-object(s): `3`."
-
-Object::nonObject = "Non-object expected at position `1` in `2`."
 
 Object::objectMember =
 "The call `1`@`2` didn't match any of defined member patterns in `1` nor in \
@@ -257,6 +265,9 @@ ObjectQ[Object] ^= True
 
 (* ::Subsection:: *)
 (*WithOrdinaryObjectSet*)
+
+
+WithOrdinaryObjectSet::objects = general::objects
 
 
 SetAttributes[WithOrdinaryObjectSet, HoldRest]
@@ -319,7 +330,7 @@ WithOrdinaryObjectSet[objs:{__?ObjectQ}, body_] :=
 	
 WithOrdinaryObjectSet[arg1:{__} /; MemberQ[arg1, _?(!ObjectQ[#]&)], arg2_] :=
 	"nothing" /;
-		Message[Object::objects,
+		Message[WithOrdinaryObjectSet::objects,
 			HoldForm[1],
 			HoldForm[WithOrdinaryObjectSet[arg1, arg2]],
 			HoldForm[Evaluate[DeleteCases[arg1, _?ObjectQ]]]
@@ -327,7 +338,7 @@ WithOrdinaryObjectSet[arg1:{__} /; MemberQ[arg1, _?(!ObjectQ[#]&)], arg2_] :=
 	
 WithOrdinaryObjectSet[arg1:Except[{__}] /; !ObjectQ[arg1], arg2_] :=
 	"nothing" /;
-		Message[Object::objects,
+		Message[WithOrdinaryObjectSet::objects,
 			HoldForm[1],
 			HoldForm[WithOrdinaryObjectSet[arg1, arg2]],
 			HoldForm[arg1]
@@ -339,6 +350,8 @@ fixArgumentsNumber[WithOrdinaryObjectSet, 2]
 (* ::Subsection:: *)
 (*SetSuper*)
 
+
+SetSuper::object = general::object
 
 SetSuper::cyclic =
 "Object `1` can't inherit from object `2`, since it would lead to \
@@ -374,10 +387,10 @@ SetSuper[obj_?ObjectQ, super_?ObjectQ] := (
 )
 	
 SetSuper[arg1_ /; !ObjectQ[arg1], arg2_] := "nothing" /;
-	Message[Object::object, HoldForm[1], HoldForm[SetSuper[arg1, arg2]]]
+	Message[SetSuper::object, HoldForm[1], HoldForm[SetSuper[arg1, arg2]]]
 
 SetSuper[arg1_, arg2_ /; !ObjectQ[arg2]] := "nothing" /;
-	Message[Object::object, HoldForm[2], HoldForm[SetSuper[arg1, arg2]]]
+	Message[SetSuper::object, HoldForm[2], HoldForm[SetSuper[arg1, arg2]]]
 
 fixArgumentsNumber[SetSuper, 2]
 
@@ -486,6 +499,11 @@ unsetMember[obj_?ObjectQ, lhs_] :=
 (*DeclareObject*)
 
 
+DeclareObject::object = general::object
+
+DeclareObject::nonObject = general::nonObject
+
+
 (*
 	Using ObjectQ[super] condition because MMA 8 chokes on
 	super:_?ObjectQ:Object
@@ -511,12 +529,12 @@ DeclareObject[arg1:Except[_Symbol], Repeated[_, {0, 1}]] := "nothing" /;
 	Message[DeclareObject::sym, HoldForm[arg1], HoldForm[1]]
 
 DeclareObject[arg1_?ObjectQ, rest:Repeated[_, {0, 1}]] := "nothing" /;
-	Message[Object::nonObject,
+	Message[DeclareObject::nonObject,
 		HoldForm[1], HoldForm[DeclareObject[arg1, rest]]
 	]
 
 DeclareObject[arg1_, arg2_ /; !ObjectQ[arg2]] := "nothing" /;
-	Message[Object::object, HoldForm[2], HoldForm[DeclareObject[arg1, arg2]]]
+	Message[DeclareObject::object, HoldForm[2], HoldForm[DeclareObject[arg1, arg2]]]
 
 DeclareObject[args___ /; !MatchQ[Length[{args}], 1 | 2]] := "nothing" /;
 	Message[DeclareObject::argt,
