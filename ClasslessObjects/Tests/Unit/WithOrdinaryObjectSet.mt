@@ -545,6 +545,195 @@ Module[
 ]
 
 
+(* ::Subsubsection:: *)
+(*Flow Control*)
+
+
+Module[
+	{
+		obj, evaluationResult, aborted,
+		oldUpValues, oldAttributes,
+		accessor, value
+	}
+	,
+	declareMockObjectWithAlteredSetUpValues[obj];
+	
+	oldUpValues = UpValues[obj];
+	oldAttributes = Attributes[obj];
+	
+	Test[
+		CheckAbort[
+			WithOrdinaryObjectSet[obj,
+				accessor[obj] ^= value;
+				
+				Abort[];
+				
+				evaluationResult
+			]
+			,
+			aborted
+		]
+		,
+		aborted
+		,
+		TestID -> "flow control: abort: evaluation"
+	];
+	
+	Test[
+		UpValues[obj]
+		,
+		Prepend[oldUpValues, HoldPattern[accessor[obj]] :> value]
+		,
+		TestID -> "flow control: abort: after: UpValues"
+	];
+	Test[
+		Attributes[obj]
+		,
+		oldAttributes
+		,
+		TestID -> "flow control: abort: after: Attributes"
+	];
+]
+
+
+Module[
+	{
+		obj, evaluationResult, thrownValue,
+		oldUpValues, oldAttributes,
+		accessor, value
+	}
+	,
+	declareMockObjectWithAlteredSetUpValues[obj];
+	
+	oldUpValues = UpValues[obj];
+	oldAttributes = Attributes[obj];
+	
+	Test[
+		Catch[
+			WithOrdinaryObjectSet[obj,
+				accessor[obj] ^= value;
+				
+				Throw[thrownValue];
+				
+				evaluationResult
+			]
+		]
+		,
+		thrownValue
+		,
+		TestID -> "flow control: throw no tag: evaluation"
+	];
+	
+	Test[
+		UpValues[obj]
+		,
+		Prepend[oldUpValues, HoldPattern[accessor[obj]] :> value]
+		,
+		TestID -> "flow control: throw no tag: after: UpValues"
+	];
+	Test[
+		Attributes[obj]
+		,
+		oldAttributes
+		,
+		TestID -> "flow control: throw no tag: after: Attributes"
+	];
+]
+
+
+Module[
+	{
+		obj, evaluationResult, thrownValue, throwTag,
+		oldUpValues, oldAttributes,
+		accessor, value
+	}
+	,
+	declareMockObjectWithAlteredSetUpValues[obj];
+	
+	oldUpValues = UpValues[obj];
+	oldAttributes = Attributes[obj];
+	
+	Test[
+		Catch[
+			WithOrdinaryObjectSet[obj,
+				accessor[obj] ^= value;
+				
+				Throw[thrownValue, throwTag];
+				
+				evaluationResult
+			]
+			,
+			throwTag
+		]
+		,
+		thrownValue
+		,
+		TestID -> "flow control: throw with tag: evaluation"
+	];
+	
+	Test[
+		UpValues[obj]
+		,
+		Prepend[oldUpValues, HoldPattern[accessor[obj]] :> value]
+		,
+		TestID -> "flow control: throw with tag: after: UpValues"
+	];
+	Test[
+		Attributes[obj]
+		,
+		oldAttributes
+		,
+		TestID -> "flow control: throw with tag: after: Attributes"
+	];
+]
+
+
+Module[
+	{
+		obj, evaluationResult,
+		label, lebeledReturnValue,
+		oldUpValues, oldAttributes,
+		accessor, value
+	}
+	,
+	declareMockObjectWithAlteredSetUpValues[obj];
+	
+	oldUpValues = UpValues[obj];
+	oldAttributes = Attributes[obj];
+	
+	Test[
+		WithOrdinaryObjectSet[obj,
+			accessor[obj] ^= value;
+			
+			Goto[label];
+			
+			evaluationResult
+		];
+		Label[label];
+		lebeledReturnValue
+		,
+		lebeledReturnValue
+		,
+		TestID -> "flow control: goto: evaluation"
+	];
+	
+	Test[
+		UpValues[obj]
+		,
+		Prepend[oldUpValues, HoldPattern[accessor[obj]] :> value]
+		,
+		TestID -> "flow control: goto: after: UpValues"
+	];
+	Test[
+		Attributes[obj]
+		,
+		oldAttributes
+		,
+		TestID -> "flow control: goto: after: Attributes"
+	];
+]
+
+
 (* ::Section:: *)
 (*TearDown*)
 
