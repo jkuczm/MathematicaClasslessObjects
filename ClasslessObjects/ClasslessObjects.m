@@ -246,26 +246,29 @@ WithOrdinaryObjectSet[obj_?ObjectQ, body_] :=
 
 WithOrdinaryObjectSet[objs:{__?ObjectQ}, body_] :=
 	Module[
-		{
-			upValues = UpValues /@ objs,
-			protected,
-			result
-		}
+		{protected, wrapper, result}
 		,
 		protected = Unprotect @@ objs;
 		(*
 			All "set altering" definitions are attached to objects via
-			UpValues, remove them temporarily.
+			UpValues, override them temporarily.
 		*)
 		Scan[
 			(
 				UpValues[#] =
-					FilterRules[
+					Replace[
 						UpValues[#]
 						,
-						Except @ HoldPattern[HoldPattern][
-							_Set | _SetDelayed | _Unset
-						]
+						RuleDelayed[
+							Verbatim[HoldPattern][
+								lhs:(_Set | _SetDelayed | _Unset)
+							]
+							,
+							val_
+						] :>
+							RuleDelayed[HoldPattern[wrapper[lhs]], val]
+						,
+						{1}
 					]
 			)&
 			,
@@ -276,7 +279,10 @@ WithOrdinaryObjectSet[objs:{__?ObjectQ}, body_] :=
 		result = body;
 		
 		Unprotect @@ protected;
-		MapThread[(UpValues[#1] = #2)&, {objs, upValues}];
+		Scan[
+			(UpValues[#] = UpValues[#] /. wrapper[lhs_] :> lhs)&,
+			objs
+		];
 		Protect @@ protected;
 		
 		result
