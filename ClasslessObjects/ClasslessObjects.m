@@ -52,8 +52,12 @@ ClearAll[WithOrdinaryObjectSet]
 WithOrdinaryObjectSet::usage =
 "\
 WithOrdinaryObjectSet[obj, body] \
-evaluates body with switched off bindnig definitions of object obj. \
-Returns result of body evaluation."
+evaluates body with switched off set-altering definitions of object obj, \
+i.e. definitions changing behavior of Set, SetDelayed and Unset used on obj. \
+Returns result of body evaluation.\
+
+WithOrdinaryObjectSet[{obj1, obj2, ...}, body] \
+switches off set-altering definitions of all given objects obji."
 
 
 Unprotect[$self]
@@ -238,38 +242,61 @@ SetAttributes[WithOrdinaryObjectSet, HoldRest]
 
 
 WithOrdinaryObjectSet[obj_?ObjectQ, body_] :=
+	WithOrdinaryObjectSet[{obj}, body]
+
+WithOrdinaryObjectSet[objs:{__?ObjectQ}, body_] :=
 	Module[
 		{
-			upValues = UpValues[obj],
+			upValues = UpValues /@ objs,
 			protected,
 			result
 		}
 		,
-		protected = Unprotect[obj];
+		protected = Unprotect @@ objs;
 		(*
 			All "set altering" definitions are attached to objects via
 			UpValues, remove them temporarily.
 		*)
-		UpValues[obj] =
-			FilterRules[
-				UpValues[obj],
-				Except[HoldPattern[HoldPattern][_Set | _SetDelayed | _Unset]]
-			];
+		Scan[
+			(
+				UpValues[#] =
+					FilterRules[
+						UpValues[#]
+						,
+						Except @ HoldPattern[HoldPattern][
+							_Set | _SetDelayed | _Unset
+						]
+					]
+			)&
+			,
+			objs
+		];
 		Protect @@ protected;
 		
 		result = body;
 		
 		Unprotect @@ protected;
-		UpValues[obj] = upValues;
+		MapThread[(UpValues[#1] = #2)&, {objs, upValues}];
 		Protect @@ protected;
 		
 		result
 	]
 	
-WithOrdinaryObjectSet[arg1_ /; !ObjectQ[arg1], arg2_] := "nothing" /;
-	Message[Object::object,
-		HoldForm[1], HoldForm[WithOrdinaryObjectSet[arg1, arg2]]
-	]
+WithOrdinaryObjectSet[arg1:{__} /; MemberQ[arg1, _?(!ObjectQ[#]&)], arg2_] :=
+	"nothing" /;
+		Message[Object::objects,
+			HoldForm[1],
+			HoldForm[WithOrdinaryObjectSet[arg1, arg2]],
+			HoldForm[Evaluate[DeleteCases[arg1, _?ObjectQ]]]
+		]
+	
+WithOrdinaryObjectSet[arg1:Except[{__}] /; !ObjectQ[arg1], arg2_] :=
+	"nothing" /;
+		Message[Object::objects,
+			HoldForm[1],
+			HoldForm[WithOrdinaryObjectSet[arg1, arg2]],
+			HoldForm[arg1]
+		]
 
 fixArgumentsNumber[WithOrdinaryObjectSet, 2]
 
