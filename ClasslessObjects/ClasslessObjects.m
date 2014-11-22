@@ -52,8 +52,12 @@ ClearAll[WithOrdinaryObjectSet]
 WithOrdinaryObjectSet::usage =
 "\
 WithOrdinaryObjectSet[obj, body] \
-evaluates body with switched off bindnig definitions of object obj. \
-Returns result of body evaluation."
+evaluates body with switched off set-altering definitions of object obj, \
+i.e. definitions changing behavior of Set, SetDelayed and Unset used on obj. \
+Returns result of body evaluation.\
+
+WithOrdinaryObjectSet[{obj1, obj2, ...}, body] \
+switches off set-altering definitions of all given objects obji."
 
 
 Unprotect[$self]
@@ -199,6 +203,10 @@ getInheritanceChain[obj_?ObjectQ, ances_:Object] /; ObjectQ[ances] :=
 
 Object::object = "Object expected at position `1` in `2`."
 
+Object::objects =
+"Object or non-empty list of objects expected at position `1` in `2`. \
+Argument contained following non-object(s): `3`."
+
 Object::nonObject = "Non-object expected at position `1` in `2`."
 
 Object::objectMember =
@@ -234,38 +242,75 @@ SetAttributes[WithOrdinaryObjectSet, HoldRest]
 
 
 WithOrdinaryObjectSet[obj_?ObjectQ, body_] :=
+	WithOrdinaryObjectSet[{obj}, body]
+
+WithOrdinaryObjectSet[objs:{__?ObjectQ}, body_] :=
 	Module[
-		{
-			upValues = UpValues[obj],
-			protected,
-			result
-		}
+		{protected, wrapper}
 		,
-		protected = Unprotect[obj];
+		protected = Unprotect @@ objs;
 		(*
 			All "set altering" definitions are attached to objects via
-			UpValues, remove them temporarily.
+			UpValues, override them temporarily.
 		*)
-		UpValues[obj] =
-			FilterRules[
-				UpValues[obj],
-				Except[HoldPattern[HoldPattern][_Set | _SetDelayed | _Unset]]
-			];
+		Scan[
+			(
+				UpValues[#] =
+					Replace[
+						UpValues[#]
+						,
+						RuleDelayed[
+							Verbatim[HoldPattern][
+								lhs:(_Set | _SetDelayed | _Unset)
+							]
+							,
+							val_
+						] :>
+							RuleDelayed[HoldPattern[wrapper[lhs]], val]
+						,
+						{1}
+					]
+			)&
+			,
+			objs
+		];
 		Protect @@ protected;
 		
-		result = body;
-		
-		Unprotect @@ protected;
-		UpValues[obj] = upValues;
-		Protect @@ protected;
-		
-		result
+		CheckAll[
+			body
+			,
+			Function[
+				{result, heldFlowControl}
+				,
+				Unprotect @@ protected;
+				Scan[
+					(UpValues[#] = UpValues[#] /. wrapper[lhs_] :> lhs)&,
+					objs
+				];
+				Protect @@ protected;
+				
+				ReleaseHold[heldFlowControl];
+				
+				result
+			]
+		]
 	]
 	
-WithOrdinaryObjectSet[arg1_ /; !ObjectQ[arg1], arg2_] := "nothing" /;
-	Message[Object::object,
-		HoldForm[1], HoldForm[WithOrdinaryObjectSet[arg1, arg2]]
-	]
+WithOrdinaryObjectSet[arg1:{__} /; MemberQ[arg1, _?(!ObjectQ[#]&)], arg2_] :=
+	"nothing" /;
+		Message[Object::objects,
+			HoldForm[1],
+			HoldForm[WithOrdinaryObjectSet[arg1, arg2]],
+			HoldForm[Evaluate[DeleteCases[arg1, _?ObjectQ]]]
+		]
+	
+WithOrdinaryObjectSet[arg1:Except[{__}] /; !ObjectQ[arg1], arg2_] :=
+	"nothing" /;
+		Message[Object::objects,
+			HoldForm[1],
+			HoldForm[WithOrdinaryObjectSet[arg1, arg2]],
+			HoldForm[arg1]
+		]
 
 fixArgumentsNumber[WithOrdinaryObjectSet, 2]
 
