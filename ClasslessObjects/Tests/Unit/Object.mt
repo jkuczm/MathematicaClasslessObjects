@@ -38,7 +38,7 @@ TestMatch[
 	,
 	HoldPattern @ Object[obj1]
 	,
-	Message[Object::argrx, Object, 1, 2]
+	Message[Object::argr, Object, 2]
 	,
 	TestID -> "1 arg"
 ]
@@ -100,37 +100,6 @@ Test[
 
 (* ::Subsection:: *)
 (*Messages*)
-
-
-Test[
-	ToString @ StringForm[Object::object, HoldForm[2], HoldForm[f[arg1, arg2]]]
-	,
-	"Object expected at position 2 in f[arg1, arg2]."
-	,
-	TestID -> "object"
-]
-
-
-Test[
-	ToString @ StringForm[Object::objects,
-		HoldForm[2], HoldForm[f[arg1, {obj, nonObj}]], HoldForm[nonObj]
-	]
-	,
-	"Object or non-empty list of objects expected at position 2 in \
-f[arg1, {obj, nonObj}]. Argument contained following non-object(s): nonObj."
-	,
-	TestID -> "objects"
-]
-
-
-Test[
-	ToString @
-		StringForm[Object::nonObject, HoldForm[2], HoldForm[f[arg1, arg2]]]
-	,
-	"Non-object expected at position 2 in f[arg1, arg2]."
-	,
-	TestID -> "nonObject"
-]
 
 
 Test[

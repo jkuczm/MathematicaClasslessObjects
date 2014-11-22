@@ -1,4 +1,5 @@
 TestSuite[{
+	"generalMessages.mt",
 	"ObjectQ.mt",
 	"Super.mt",
 	"getInheritanceChain.mt",

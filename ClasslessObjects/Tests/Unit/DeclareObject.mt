@@ -60,7 +60,7 @@ Module[
 		,
 		HoldPattern @ DeclareObject[mockObj1]
 		,
-		Message[Object::nonObject, 1, DeclareObject[mockObj1]]
+		Message[DeclareObject::nonObject, 1, DeclareObject[mockObj1]]
 		,
 		TestID -> "1 arg: object: DeclareObject evaluation"
 	];
@@ -91,7 +91,9 @@ Module[
 		,
 		{
 			Message[DeclareObject::sym, "non-symbol", 1],
-			Message[Object::object, 2, DeclareObject["non-symbol", nonObject2]]
+			Message[DeclareObject::object,
+				2, DeclareObject["non-symbol", nonObject2]
+			]
 		}
 		,
 		TestID -> "2 args: non-symbol, non-object: DeclareObject evaluation"
@@ -123,8 +125,12 @@ Module[
 		HoldPattern @ DeclareObject[mockObj1, nonObject2]
 		,
 		{
-			Message[Object::nonObject, 1, DeclareObject[mockObj1, nonObject2]],
-			Message[Object::object, 2, DeclareObject[mockObj1, nonObject2]]
+			Message[DeclareObject::nonObject,
+				1, DeclareObject[mockObj1, nonObject2]
+			],
+			Message[DeclareObject::object,
+				2, DeclareObject[mockObj1, nonObject2]
+			]
 		}
 		,
 		TestID -> "2 args: object, non-object: DeclareObject evaluation"
@@ -189,7 +195,7 @@ Module[
 		,
 		HoldPattern @ DeclareObject[mockObj1, mockObj2]
 		,
-		Message[Object::nonObject, 1, DeclareObject[mockObj1, mockObj2]]
+		Message[DeclareObject::nonObject, 1, DeclareObject[mockObj1, mockObj2]]
 		,
 		TestID -> "2 args: object, object: DeclareObject evaluation"
 	];
@@ -225,7 +231,9 @@ Module[
 		,
 		HoldPattern @ DeclareObject[nonObject1, nonObject2]
 		,
-		Message[Object::object, 2, DeclareObject[nonObject1, nonObject2]]
+		Message[DeclareObject::object,
+			2, DeclareObject[nonObject1, nonObject2]
+		]
 		,
 		TestID ->
 			"2 args: non-object symbol, non-object: DeclareObject evaluation"

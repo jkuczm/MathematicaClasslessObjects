@@ -24,7 +24,7 @@ TestMatch[
 	,
 	HoldPattern @ Super[]
 	,
-	Message[Super::argx, Super, 0, 1]
+	Message[Super::argx, Super, 0]
 	,
 	TestID -> "no args"
 ]
@@ -35,7 +35,7 @@ TestMatch[
 	,
 	HoldPattern @ Super[sym]
 	,
-	Message[Object::object, 1, Super[sym]]
+	Message[Super::object, 1, Super[sym]]
 	,
 	TestID -> "1 arg: non-object"
 ]
@@ -46,7 +46,7 @@ TestMatch[
 	,
 	HoldPattern @ Super[sym1, sym2]
 	,
-	Message[Super::argx, Super, 2, 1]
+	Message[Super::argx, Super, 2]
 	,
 	TestID -> "2 args"
 ]
