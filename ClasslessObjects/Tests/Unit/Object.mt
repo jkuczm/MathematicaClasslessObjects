@@ -38,7 +38,7 @@ TestMatch[
 	,
 	HoldPattern @ Object[obj1]
 	,
-	Message[Object::argrx, Object, 1, 2]
+	Message[Object::argr, Object, 2]
 	,
 	TestID -> "1 arg"
 ]

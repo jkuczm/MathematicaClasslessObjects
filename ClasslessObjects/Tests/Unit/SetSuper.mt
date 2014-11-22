@@ -49,7 +49,7 @@ Module[
 		,
 		HoldPattern @ SetSuper[arg1]
 		,
-		Message[SetSuper::argrx, SetSuper, 1, 2]
+		Message[SetSuper::argr, SetSuper, 2]
 		,
 		TestID -> "1 arg: SetSuper evaluation"
 	];

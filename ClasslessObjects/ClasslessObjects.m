@@ -152,14 +152,32 @@ unsets ordinary: obj[member] and inheritable: obj[member, self_] definitions."
 
 
 fixArgumentsNumber[sym_Symbol, argNo_Integer] :=
-	With[
-		{msgName = If[argNo === 1, sym::argx, sym::argrx]}
-		,
-		sym[args___ /; Length[{args}] != argNo] := "nothing" /;
-			Message[msgName,
-				HoldForm[sym],
-				HoldForm[Evaluate @ Length[{args}]],
-				HoldForm[argNo]
+	If[argNo === 1,
+		sym[args___] := "nothing" /;
+			With[
+				{givenArgsNo = Length[{args}]}
+				,
+				If[givenArgsNo =!= 1,
+					Message[sym::argx, HoldForm[sym], HoldForm[givenArgsNo]]
+				]
+			];
+	(* else *),
+		sym[args___] := "nothing" /;
+			With[
+				{givenArgsNo = Length[{args}]}
+				,
+				Switch[givenArgsNo,
+					argNo,
+						False,
+					1,
+						Message[sym::argr, HoldForm[sym], HoldForm[argNo]],
+					_,
+						Message[sym::argrx,
+							HoldForm[sym],
+							HoldForm[givenArgsNo],
+							HoldForm[argNo]
+						]
+				]
 			];
 	]
 

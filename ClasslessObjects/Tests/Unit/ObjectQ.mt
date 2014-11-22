@@ -24,7 +24,7 @@ TestMatch[
 	,
 	HoldPattern @ ObjectQ[]
 	,
-	Message[ObjectQ::argx, ObjectQ, 0, 1]
+	Message[ObjectQ::argx, ObjectQ, 0]
 	,
 	TestID -> "no args"
 ]
@@ -35,7 +35,7 @@ TestMatch[
 	,
 	HoldPattern @ ObjectQ[sym1, sym2]
 	,
-	Message[ObjectQ::argx, ObjectQ, 2, 1]
+	Message[ObjectQ::argx, ObjectQ, 2]
 	,
 	TestID -> "2 args"
 ]

@@ -74,7 +74,7 @@ Module[
 		,
 		HoldPattern @ WithOrdinaryObjectSet[obj]
 		,
-		Message[WithOrdinaryObjectSet::argrx, WithOrdinaryObjectSet, 1, 2]
+		Message[WithOrdinaryObjectSet::argr, WithOrdinaryObjectSet, 2]
 		,
 		TestID -> "1 arg: evaluation"
 	];
