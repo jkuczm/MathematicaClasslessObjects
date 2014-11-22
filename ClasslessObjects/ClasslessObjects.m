@@ -199,6 +199,10 @@ getInheritanceChain[obj_?ObjectQ, ances_:Object] /; ObjectQ[ances] :=
 
 Object::object = "Object expected at position `1` in `2`."
 
+Object::objects =
+"Object or non-empty list of objects expected at position `1` in `2`. \
+Argument contained following non-object(s): `3`."
+
 Object::nonObject = "Non-object expected at position `1` in `2`."
 
 Object::objectMember =
