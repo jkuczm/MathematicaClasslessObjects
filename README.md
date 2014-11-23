@@ -1,6 +1,6 @@
 # Classless Objects
 
-[![release v0.1.1](http://img.shields.io/badge/release-v0.1.1-blue.svg)](https://github.com/jkuczm/MathematicaClasslessObjects/releases/latest)
+[![release v0.2.0](http://img.shields.io/badge/release-v0.2.0-blue.svg)](https://github.com/jkuczm/MathematicaClasslessObjects/releases/latest)
 [![Semantic Versioning](http://jkuczm.github.io/media/images/SemVer-2.0.0-brightgreen.svg)](http://semver.org/spec/v2.0.0.html)
 [![license MIT](http://jkuczm.github.io/media/images/license-MIT-blue.svg)](https://github.com/jkuczm/MathematicaClasslessObjects/blob/master/LICENSE)
 [![Mathematica 8.0 9.0 10.0](http://jkuczm.github.io/media/images/Mathematica-8.0_9.0_10.0-brightgreen.svg)](#compatibility)
@@ -51,7 +51,7 @@ To load ClasslessObjects package evaluate: ``Needs["ClasslessObjects`"]``.
 ### Manual installation
 
 1. Download latest released
-   [ClasslessObjects.zip](https://github.com/jkuczm/MathematicaClasslessObjects/releases/download/v0.1.1/ClasslessObjects.zip)
+   [ClasslessObjects.zip](https://github.com/jkuczm/MathematicaClasslessObjects/releases/download/v0.2.0/ClasslessObjects.zip)
    file.
 
 2. Extract downloaded `ClasslessObjects.zip` to any directory which is on
