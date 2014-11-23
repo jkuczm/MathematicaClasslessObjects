@@ -66,7 +66,7 @@ ClearAll[$self]
 $self::usage =
 "\
 $self \
-is a variable that, in the scope of bound member, is equal to object on \
+is a variable which value, in the scope of bound member, is an object on \
 which that member was called."
 
 
@@ -104,11 +104,12 @@ ClearAll[getInheritanceChain]
 getInheritanceChain::usage =
 "\
 getInheritanceChain[obj] \
-returns list of all ancestors of given object obj.\
+returns list containing object obj and all its ancestors.\
 
 getInheritanceChain[obj, ances] \
-returns list of ancestors of given object obj up to object ances if ances is \
-one of obj ancestors. Otherwise returns list of all ancestors."
+returns list containing object obj and all its ancestors up to object ances, \
+if ances is one of obj ancestors. Otherwise returns list containing all \
+ancestors."
 
 
 ClearAll[withBoundSelf]
@@ -516,13 +517,13 @@ DeclareObject[obj_Symbol /; !ObjectQ[obj], super:_:Object] /; ObjectQ[super] :=
 		SetSuper[obj, super];
 		
 		(* Make members created with Set automatically inheritable. *)
-		obj /: Set[obj[lhs_], rhs_] := (setMember[obj, lhs, rhs]);
+		obj /: Set[obj[lhs_], rhs_] := setMember[obj, lhs, rhs];
 		
 		(* Make members created with SetDelayed automatically bound. *)
-		obj /: SetDelayed[obj[lhs_], rhs_] := (bindMember[obj, lhs, rhs]);
+		obj /: SetDelayed[obj[lhs_], rhs_] := bindMember[obj, lhs, rhs];
 		
 		(* Make sure unset removes ordinary and inheritable definitions. *)
-		obj /: Unset[obj[lhs_]] := (unsetMember[obj, lhs]);
+		obj /: Unset[obj[lhs_]] := unsetMember[obj, lhs];
 	)
 
 DeclareObject[arg1:Except[_Symbol], Repeated[_, {0, 1}]] := "nothing" /;
@@ -534,7 +535,9 @@ DeclareObject[arg1_?ObjectQ, rest:Repeated[_, {0, 1}]] := "nothing" /;
 	]
 
 DeclareObject[arg1_, arg2_ /; !ObjectQ[arg2]] := "nothing" /;
-	Message[DeclareObject::object, HoldForm[2], HoldForm[DeclareObject[arg1, arg2]]]
+	Message[DeclareObject::object,
+		HoldForm[2], HoldForm[DeclareObject[arg1, arg2]]
+	]
 
 DeclareObject[args___ /; !MatchQ[Length[{args}], 1 | 2]] := "nothing" /;
 	Message[DeclareObject::argt,
